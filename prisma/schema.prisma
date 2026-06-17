@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ArticleStatus {
+  draft
+  reviewed
+  published
+}
+
+enum NewsletterFrequency {
+  daily
+  weekly
+}
+
+model Article {
+  id              String        @id @default(cuid())
+  title           String
+  slug            String        @unique
+  originalUrl     String        @unique
+  author          String?
+  publishedAt     DateTime
+  tags            String[]      @default([])
+  clubName        String?
+  city            String?
+  state           String?
+  originalExcerpt String?
+  aiSummary       String
+  importanceScore Int           @default(50)
+  status          ArticleStatus @default(draft)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  sourceId   String
+  source     Source   @relation(fields: [sourceId], references: [id])
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  heroImageId String?
+  heroImage   MediaAsset? @relation(fields: [heroImageId], references: [id], onDelete: SetNull)
+
+  executiveMove     ExecutiveMove?
+  developmentProject DevelopmentProject?
+  newsletterStories  NewsletterStory[]
+
+  @@index([status, publishedAt])
+  @@index([categoryId])
+  @@index([sourceId])
+  @@index([heroImageId])
+  @@index([clubName])
+  @@index([city, state])
+}
+
+model MediaAsset {
+  id          String    @id @default(cuid())
+  title       String
+  url         String    @unique
+  altText     String?
+  caption     String?
+  credit      String?
+  category    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  articles    Article[]
+
+  @@index([category])
+}
+
+model Source {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  homepageUrl String?
+  rssUrl      String?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  articles    Article[]
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  articles    Article[]
+}
+
+model NewsletterSubscriber {
+  id        String              @id @default(cuid())
+  email     String              @unique
+  frequency NewsletterFrequency @default(weekly)
+  active    Boolean             @default(true)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+}
+
+model NewsletterIssue {
+  id          String            @id @default(cuid())
+  title       String
+  frequency   NewsletterFrequency
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  stories     NewsletterStory[]
+}
+
+model NewsletterStory {
+  id            String          @id @default(cuid())
+  issueId       String
+  articleId     String
+  shortSummary  String
+  position      Int             @default(0)
+  issue         NewsletterIssue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  article       Article         @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([issueId, articleId])
+}
+
+model JobPosting {
+  id          String   @id @default(cuid())
+  title       String
+  clubName    String
+  city        String?
+  state       String?
+  url         String?
+  postedAt    DateTime @default(now())
+  expiresAt   DateTime?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ExecutiveMove {
+  id          String   @id @default(cuid())
+  executive   String
+  newRole     String
+  previousRole String?
+  clubName    String
+  city        String?
+  state       String?
+  effectiveAt DateTime?
+  notes       String?
+  articleId   String?  @unique
+  article     Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model DevelopmentProject {
+  id          String   @id @default(cuid())
+  clubName    String
+  projectName String
+  city        String?
+  state       String?
+  budget      String?
+  timeline    String?
+  architect   String?
+  status      String?
+  description String?
+  articleId   String?  @unique
+  article     Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
