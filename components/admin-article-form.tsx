@@ -1,12 +1,46 @@
 import type { ArticleStatus, Category, MediaAsset, Source } from "@prisma/client";
+import { Bot, CheckCircle2, Link2, PenLine } from "lucide-react";
 import type * as React from "react";
 import type { ArticleWithRelations } from "@/lib/articles";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 const statuses: ArticleStatus[] = ["draft", "reviewed", "published"];
+
+function AiProcessingStatus({ article }: { article: ArticleWithRelations }) {
+  const aiProcessed = Boolean(article.aiWhatHappened || article.aiWhyItMatters);
+  const linkedEntities = [
+    ...article.clubs.map((club) => club.name),
+    ...article.companies.map((company) => company.name),
+    ...article.people.map((person) => `${person.firstName} ${person.lastName}`)
+  ];
+
+  return (
+    <div className="rounded-md border bg-muted/40 p-4 text-sm">
+      <div className="flex flex-wrap items-center gap-2">
+        {aiProcessed ? (
+          <Badge className="border-emerald-200 bg-emerald-50 text-emerald-800"><Bot className="mr-1 h-3 w-3" /> AI processed</Badge>
+        ) : (
+          <Badge className="border-slate-200 bg-white text-slate-700"><Bot className="mr-1 h-3 w-3" /> Not AI processed</Badge>
+        )}
+        {article.status === "reviewed" ? (
+          <Badge className="border-amber-200 bg-amber-50 text-amber-800"><PenLine className="mr-1 h-3 w-3" /> Awaiting human approval</Badge>
+        ) : null}
+        {article.status === "published" ? (
+          <Badge className="border-emerald-200 bg-emerald-50 text-emerald-800"><CheckCircle2 className="mr-1 h-3 w-3" /> Published</Badge>
+        ) : null}
+        {aiProcessed ? <Badge className="border-slate-200 bg-white text-slate-700">AI summary available</Badge> : null}
+      </div>
+      <div className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
+        <Link2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+        {linkedEntities.length ? <span><span className="font-semibold text-foreground">Linked entities:</span> {linkedEntities.join(", ")}</span> : <span>No clubs, companies, or people linked yet.</span>}
+      </div>
+    </div>
+  );
+}
 
 export function AdminArticleForm({
   action,
@@ -27,6 +61,7 @@ export function AdminArticleForm({
 
   return (
     <form action={action} className="grid gap-5 rounded-lg border bg-white p-5">
+      {article ? <AiProcessingStatus article={article} /> : null}
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Title" name="title" defaultValue={article?.title} required />
         <Field label="Original URL" name="originalUrl" defaultValue={article?.originalUrl} type="url" required />
@@ -124,8 +159,16 @@ export function AdminArticleForm({
         <Textarea id="originalExcerpt" name="originalExcerpt" defaultValue={article?.originalExcerpt ?? undefined} />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="aiSummary">AI Summary</Label>
+        <Label htmlFor="aiSummary">AI Summary (Executive Summary)</Label>
         <Textarea id="aiSummary" name="aiSummary" defaultValue={article?.aiSummary} required />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="aiWhatHappened">AI: What Happened</Label>
+        <Textarea id="aiWhatHappened" name="aiWhatHappened" defaultValue={article?.aiWhatHappened ?? undefined} placeholder="Generated automatically during RSS ingestion. Leave blank to fall back to the original excerpt." />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="aiWhyItMatters">AI: Why It Matters</Label>
+        <Textarea id="aiWhyItMatters" name="aiWhyItMatters" defaultValue={article?.aiWhyItMatters ?? undefined} placeholder="Generated automatically during RSS ingestion. Leave blank to fall back to the default framing." />
       </div>
       <Button type="submit">{article ? "Update Article" : "Create Article"}</Button>
     </form>

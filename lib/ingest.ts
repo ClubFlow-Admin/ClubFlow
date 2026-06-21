@@ -1,10 +1,8 @@
 import { ArticleStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { summarizeClubStory } from "@/lib/openai";
+import { generateEditorialBrief, type EditorialBrief } from "@/lib/openai";
 import { ingestRssFeed } from "@/lib/rss";
 import { slugify } from "@/lib/utils";
-
-const AI_UNCONFIGURED_MESSAGE = "OpenAI is not configured. Add OPENAI_API_KEY to generate a ClubFlow summary.";
 
 const categorySlugBySourceCategory: Record<string, string> = {
   industry: "industry-news",
@@ -23,6 +21,7 @@ export type SourceIngestResult = {
   articlesCreated: number;
   duplicatesSkipped: number;
   aiSummariesGenerated: number;
+  entitiesLinked: number;
   error?: string;
 };
 
@@ -32,8 +31,40 @@ export type IngestRunSummary = {
   articlesCreated: number;
   duplicatesSkipped: number;
   aiSummariesGenerated: number;
+  entitiesLinked: number;
   sources: SourceIngestResult[];
 };
+
+type EntityIndex = {
+  clubs: { id: string; name: string }[];
+  companies: { id: string; name: string }[];
+  people: { id: string; firstName: string; lastName: string }[];
+};
+
+async function loadEntityIndex(): Promise<EntityIndex> {
+  const [clubs, companies, people] = await Promise.all([
+    prisma.club.findMany({ select: { id: true, name: true } }),
+    prisma.company.findMany({ select: { id: true, name: true } }),
+    prisma.person.findMany({ select: { id: true, firstName: true, lastName: true } })
+  ]);
+  return { clubs, companies, people };
+}
+
+function matchEntityIds(candidates: EditorialBrief["entities"], index: EntityIndex) {
+  const normalize = (value: string) => value.trim().toLowerCase();
+
+  const clubNames = new Set(candidates.clubs.map(normalize));
+  const companyNames = new Set(candidates.companies.map(normalize));
+  const peopleNames = new Set(candidates.people.map(normalize));
+
+  const clubIds = index.clubs.filter((club) => clubNames.has(normalize(club.name))).map((club) => club.id);
+  const companyIds = index.companies.filter((company) => companyNames.has(normalize(company.name))).map((company) => company.id);
+  const personIds = index.people
+    .filter((person) => peopleNames.has(normalize(`${person.firstName} ${person.lastName}`)))
+    .map((person) => person.id);
+
+  return { clubIds, companyIds, personIds };
+}
 
 async function uniqueSlug(baseSlug: string) {
   let slug = baseSlug || "story";
@@ -47,6 +78,7 @@ async function uniqueSlug(baseSlug: string) {
 
 export async function runRssIngestion(): Promise<IngestRunSummary> {
   const sources = await prisma.source.findMany({ where: { active: true, rssUrl: { not: null } } });
+  const entityIndex = await loadEntityIndex();
   const results: SourceIngestResult[] = [];
 
   for (const source of sources) {
@@ -57,7 +89,8 @@ export async function runRssIngestion(): Promise<IngestRunSummary> {
       itemsFound: 0,
       articlesCreated: 0,
       duplicatesSkipped: 0,
-      aiSummariesGenerated: 0
+      aiSummariesGenerated: 0,
+      entitiesLinked: 0
     };
 
     try {
@@ -91,19 +124,41 @@ export async function runRssIngestion(): Promise<IngestRunSummary> {
 
         const slug = await uniqueSlug(slugify(item.title));
         const fallbackSummary = item.excerpt?.trim() || item.title;
-        let aiSummary = fallbackSummary;
-        let status: ArticleStatus = ArticleStatus.draft;
 
+        let aiSummary = fallbackSummary;
+        let aiWhatHappened: string | null = null;
+        let aiWhyItMatters: string | null = null;
+        let city: string | null = null;
+        let state: string | null = null;
+        let status: ArticleStatus = ArticleStatus.draft;
+        let clubIds: string[] = [];
+        let companyIds: string[] = [];
+        let personIds: string[] = [];
+
+        // AI processing never throws (generateEditorialBrief returns null on any
+        // failure), but the surrounding try/catch is defense-in-depth so a bad
+        // entity match or unexpected error here still can't fail the whole import.
         try {
-          const generated = await summarizeClubStory({ title: item.title, excerpt: item.excerpt, source: source.name });
-          const trimmed = generated?.trim();
-          if (trimmed && trimmed !== AI_UNCONFIGURED_MESSAGE) {
-            aiSummary = trimmed;
+          const brief = await generateEditorialBrief({ title: item.title, excerpt: item.excerpt, source: source.name });
+          if (brief) {
+            aiSummary = brief.executiveSummary || fallbackSummary;
+            aiWhatHappened = brief.whatHappened || null;
+            aiWhyItMatters = brief.whyItMatters || null;
+            city = brief.location.city || null;
+            state = brief.location.state || null;
             status = ArticleStatus.reviewed;
             result.aiSummariesGenerated += 1;
+
+            const matched = matchEntityIds(brief.entities, entityIndex);
+            clubIds = matched.clubIds;
+            companyIds = matched.companyIds;
+            personIds = matched.personIds;
+            if (clubIds.length || companyIds.length || personIds.length) {
+              result.entitiesLinked += 1;
+            }
           }
         } catch (aiError) {
-          console.error(`[ingest] AI summary failed for ${item.originalUrl}:`, aiError);
+          console.error(`[ingest] AI processing failed for ${item.originalUrl}:`, aiError);
         }
 
         await prisma.article.create({
@@ -114,9 +169,16 @@ export async function runRssIngestion(): Promise<IngestRunSummary> {
             publishedAt: item.publishedAt ?? new Date(),
             originalExcerpt: item.excerpt ?? null,
             aiSummary,
+            aiWhatHappened,
+            aiWhyItMatters,
+            city,
+            state,
             status,
             sourceId: source.id,
-            categoryId: category.id
+            categoryId: category.id,
+            clubs: clubIds.length ? { connect: clubIds.map((id) => ({ id })) } : undefined,
+            companies: companyIds.length ? { connect: companyIds.map((id) => ({ id })) } : undefined,
+            people: personIds.length ? { connect: personIds.map((id) => ({ id })) } : undefined
           }
         });
 
@@ -150,6 +212,7 @@ export async function runRssIngestion(): Promise<IngestRunSummary> {
     articlesCreated: results.reduce((sum, item) => sum + item.articlesCreated, 0),
     duplicatesSkipped: results.reduce((sum, item) => sum + item.duplicatesSkipped, 0),
     aiSummariesGenerated: results.reduce((sum, item) => sum + item.aiSummariesGenerated, 0),
+    entitiesLinked: results.reduce((sum, item) => sum + item.entitiesLinked, 0),
     sources: results
   };
 }

@@ -13,7 +13,7 @@ const status = z.nativeEnum(ArticleStatus);
 const articleSchema = z.object({
   title: z.string().min(3), originalUrl: z.string().url(), sourceId: z.string().min(1), author: optional,
   publishedAt: z.string().min(1), tags: z.string().optional(), clubName: optional, city: optional, state: optional,
-  originalExcerpt: optional, aiSummary: z.string().min(10), importanceScore: z.coerce.number().int().min(0).max(100),
+  originalExcerpt: optional, aiSummary: z.string().min(10), aiWhatHappened: optional, aiWhyItMatters: optional, importanceScore: z.coerce.number().int().min(0).max(100),
   status, heroImageId: optional
 });
 const jobSchema = z.object({ title: z.string().min(2), clubName: z.string().min(2), city: optional, state: optional, url: optional, postedAt: z.string().min(1), expiresAt: optional, description: optional, status });

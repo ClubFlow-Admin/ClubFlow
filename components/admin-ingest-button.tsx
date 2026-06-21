@@ -47,6 +47,7 @@ export function AdminIngestButton() {
             <Stat label="Articles created" value={state.summary.articlesCreated} />
             <Stat label="Duplicates skipped" value={state.summary.duplicatesSkipped} />
             <Stat label="AI summaries generated" value={state.summary.aiSummariesGenerated} />
+            <Stat label="Entities linked" value={state.summary.entitiesLinked} />
           </dl>
           {state.summary.sources.some((source) => source.status === "error" || source.error) ? (
             <div className="mt-3 border-t border-white/10 pt-3">

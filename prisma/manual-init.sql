@@ -292,3 +292,6 @@ CREATE INDEX IF NOT EXISTS "Company_status_idx" ON "Company"("status");
 CREATE INDEX IF NOT EXISTS "Company_industry_idx" ON "Company"("industry");
 CREATE INDEX IF NOT EXISTS "Person_status_idx" ON "Person"("status");
 CREATE INDEX IF NOT EXISTS "Person_lastName_firstName_idx" ON "Person"("lastName", "firstName");
+
+ALTER TABLE "Article" ADD COLUMN IF NOT EXISTS "aiWhatHappened" TEXT;
+ALTER TABLE "Article" ADD COLUMN IF NOT EXISTS "aiWhyItMatters" TEXT;

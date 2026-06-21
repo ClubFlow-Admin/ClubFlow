@@ -2,7 +2,7 @@ import { ArticleStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export type ArticleWithRelations = Prisma.ArticleGetPayload<{
-  include: { category: true; source: true; heroImage: true };
+  include: { category: true; source: true; heroImage: true; clubs: true; companies: true; people: true };
 }>;
 
 export type ArticleFilters = {
@@ -70,7 +70,7 @@ export async function getArticles(filters: ArticleFilters = {}) {
 
   return prisma.article.findMany({
     where,
-    include: { category: true, source: true, heroImage: true },
+    include: { category: true, source: true, heroImage: true, clubs: true, companies: true, people: true },
     orderBy: [{ importanceScore: "desc" }, { publishedAt: "desc" }]
   });
 }
@@ -78,6 +78,6 @@ export async function getArticles(filters: ArticleFilters = {}) {
 export async function getPublishedArticleBySlug(slug: string) {
   return prisma.article.findFirst({
     where: { slug, status: "published" },
-    include: { category: true, source: true, heroImage: true }
+    include: { category: true, source: true, heroImage: true, clubs: true, companies: true, people: true }
   });
 }
