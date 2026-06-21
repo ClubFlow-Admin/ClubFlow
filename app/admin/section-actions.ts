@@ -11,11 +11,20 @@ import { slugify } from "@/lib/utils";
 const optional = z.string().optional().transform((value) => value?.trim() || null);
 const status = z.nativeEnum(ArticleStatus);
 const articleSchema = z.object({
-  title: z.string().min(3), originalUrl: z.string().url(), sourceId: z.string().min(1), author: optional,
+  title: z.string().min(3), dek: optional, originalUrl: z.string().url(), sourceId: z.string().min(1), author: optional,
   publishedAt: z.string().min(1), tags: z.string().optional(), clubName: optional, city: optional, state: optional,
-  originalExcerpt: optional, aiSummary: z.string().min(10), aiWhatHappened: optional, aiWhyItMatters: optional, importanceScore: z.coerce.number().int().min(0).max(100),
+  originalExcerpt: optional, aiSummary: z.string().min(10), aiWhatHappened: optional, aiWhyItMatters: optional,
+  aiIndustryContext: optional, importanceScore: z.coerce.number().int().min(0).max(100),
   status, heroImageId: optional
 });
+
+function entityRelationsFromForm(formData: FormData) {
+  return {
+    clubs: formData.getAll("clubIds").map(String),
+    companies: formData.getAll("companyIds").map(String),
+    people: formData.getAll("personIds").map(String)
+  };
+}
 const jobSchema = z.object({ title: z.string().min(2), clubName: z.string().min(2), city: optional, state: optional, url: optional, postedAt: z.string().min(1), expiresAt: optional, description: optional, status });
 const moveSchema = z.object({ executive: z.string().min(2), newRole: z.string().min(2), previousRole: optional, clubName: z.string().min(2), city: optional, state: optional, effectiveAt: optional, publishedAt: z.string().min(1), notes: optional, status });
 const rankingSchema = z.object({ category: z.string().min(2), rank: z.coerce.number().int().positive(), clubName: z.string().min(2), city: optional, state: optional, score: z.preprocess((value) => value === "" ? null : value, z.coerce.number().int().min(0).max(100).nullable()), rationale: z.string().min(10), publishedAt: z.string().min(1), status });
@@ -39,7 +48,21 @@ export async function createSectionContent(sectionSlug: string, formData: FormDa
     const parsed = articleSchema.parse(raw);
     const category = await prisma.category.findUnique({ where: { slug: section.categorySlug } });
     if (!category) throw new Error(`Missing locked category: ${section.categorySlug}`);
-    await prisma.article.create({ data: { ...parsed, slug: slugify(parsed.title), publishedAt: new Date(parsed.publishedAt), tags: parsed.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? [], categoryId: category.id } });
+    const aiKeyTakeaways = formData.getAll("aiKeyTakeaways").map(String).map((item) => item.trim()).filter(Boolean);
+    const entities = entityRelationsFromForm(formData);
+    await prisma.article.create({
+      data: {
+        ...parsed,
+        slug: slugify(parsed.title),
+        publishedAt: new Date(parsed.publishedAt),
+        tags: parsed.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? [],
+        categoryId: category.id,
+        aiKeyTakeaways,
+        clubs: entities.clubs.length ? { connect: entities.clubs.map((id) => ({ id })) } : undefined,
+        companies: entities.companies.length ? { connect: entities.companies.map((id) => ({ id })) } : undefined,
+        people: entities.people.length ? { connect: entities.people.map((id) => ({ id })) } : undefined
+      }
+    });
   } else if (section.kind === "job") {
     const parsed = jobSchema.parse(raw);
     await prisma.jobPosting.create({ data: { ...parsed, postedAt: new Date(parsed.postedAt), expiresAt: dateOrNull(parsed.expiresAt) } });
@@ -63,7 +86,22 @@ export async function updateSectionContent(sectionSlug: string, id: string, form
     const parsed = articleSchema.parse(raw);
     const category = await prisma.category.findUnique({ where: { slug: section.categorySlug } });
     if (!category) throw new Error(`Missing locked category: ${section.categorySlug}`);
-    await prisma.article.update({ where: { id }, data: { ...parsed, slug: slugify(parsed.title), publishedAt: new Date(parsed.publishedAt), tags: parsed.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? [], categoryId: category.id } });
+    const aiKeyTakeaways = formData.getAll("aiKeyTakeaways").map(String).map((item) => item.trim()).filter(Boolean);
+    const entities = entityRelationsFromForm(formData);
+    await prisma.article.update({
+      where: { id },
+      data: {
+        ...parsed,
+        slug: slugify(parsed.title),
+        publishedAt: new Date(parsed.publishedAt),
+        tags: parsed.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? [],
+        categoryId: category.id,
+        aiKeyTakeaways,
+        clubs: { set: entities.clubs.map((entityId) => ({ id: entityId })) },
+        companies: { set: entities.companies.map((entityId) => ({ id: entityId })) },
+        people: { set: entities.people.map((entityId) => ({ id: entityId })) }
+      }
+    });
   } else if (section.kind === "job") {
     const parsed = jobSchema.parse(raw);
     await prisma.jobPosting.update({ where: { id }, data: { ...parsed, postedAt: new Date(parsed.postedAt), expiresAt: dateOrNull(parsed.expiresAt) } });

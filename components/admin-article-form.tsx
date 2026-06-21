@@ -2,6 +2,9 @@ import type { ArticleStatus, Category, MediaAsset, Source } from "@prisma/client
 import { Bot, CheckCircle2, Link2, PenLine } from "lucide-react";
 import type * as React from "react";
 import type { ArticleWithRelations } from "@/lib/articles";
+import { AdminAiTextField } from "@/components/admin-ai-text-field";
+import { AdminEntityTagging } from "@/components/admin-entity-tagging";
+import { AdminKeyTakeawaysField } from "@/components/admin-key-takeaways-field";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,13 +45,27 @@ function AiProcessingStatus({ article }: { article: ArticleWithRelations }) {
   );
 }
 
+function EditorSection({ eyebrow, title, description, children }: { eyebrow: string; title: string; description?: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-lg border bg-white p-6">
+      <div className="mb-4">
+        <div className="text-[11px] font-black uppercase tracking-[.14em] text-primary">{eyebrow}</div>
+        <h2 className="font-serif mt-1 text-xl font-black">{title}</h2>
+        {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 export function AdminArticleForm({
   action,
   article,
   categories,
   lockedCategory,
   mediaAssets = [],
-  sources
+  sources,
+  entityOptions
 }: {
   action: (formData: FormData) => Promise<void>;
   article?: ArticleWithRelations;
@@ -56,121 +73,146 @@ export function AdminArticleForm({
   lockedCategory?: Category;
   mediaAssets?: MediaAsset[];
   sources: Source[];
+  entityOptions: { clubs: { id: string; name: string }[]; companies: { id: string; name: string }[]; people: { id: string; firstName: string; lastName: string }[] };
 }) {
   const publishedAt = article?.publishedAt.toISOString().slice(0, 10) ?? new Date().toISOString().slice(0, 10);
 
   return (
-    <form action={action} className="grid gap-5 rounded-lg border bg-white p-5">
+    <form action={action} className="grid gap-6">
       {article ? <AiProcessingStatus article={article} /> : null}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Field label="Title" name="title" defaultValue={article?.title} required />
-        <Field label="Original URL" name="originalUrl" defaultValue={article?.originalUrl} type="url" required />
-        <div className="grid gap-2">
-          <Label htmlFor="sourceId">Source</Label>
-          <select
-            id="sourceId"
-            name="sourceId"
-            defaultValue={article?.sourceId}
-            required
-            className="h-10 rounded-md border bg-background px-3 text-sm"
-          >
-            <option value="">Select source</option>
-            {sources.map((source) => (
-              <option value={source.id} key={source.id}>
-                {source.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        {lockedCategory ? (
-          <div className="grid gap-2">
-            <Label>Locked Section</Label>
-            <div className="flex h-10 items-center rounded-md border border-primary/30 bg-primary/10 px-3 text-sm font-black text-primary">{lockedCategory.name}</div>
-            <input type="hidden" name="categoryId" value={lockedCategory.id} />
+
+      <EditorSection eyebrow="Article" title="Headline & Publishing Details" description="Locked metadata that controls where and when this briefing runs.">
+        <div className="grid gap-4">
+          <AdminAiTextField id="title" name="title" label="Headline" defaultValue={article?.title} multiline={false} required actions={["improve_headline"]} articleTitle={article?.title} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="sourceId">Source</Label>
+              <select id="sourceId" name="sourceId" defaultValue={article?.sourceId} required className="h-10 rounded-md border bg-background px-3 text-sm">
+                <option value="">Select source</option>
+                {sources.map((source) => <option value={source.id} key={source.id}>{source.name}</option>)}
+              </select>
+            </div>
+            {lockedCategory ? (
+              <div className="grid gap-2">
+                <Label>Locked Section</Label>
+                <div className="flex h-10 items-center rounded-md border border-primary/30 bg-primary/10 px-3 text-sm font-black text-primary">{lockedCategory.name}</div>
+                <input type="hidden" name="categoryId" value={lockedCategory.id} />
+              </div>
+            ) : (
+              <div className="grid gap-2">
+                <Label htmlFor="categoryId">Category</Label>
+                <select id="categoryId" name="categoryId" defaultValue={article?.categoryId} required className="h-10 rounded-md border bg-background px-3 text-sm">
+                  <option value="">Select category</option>
+                  {(categories ?? []).map((category) => <option value={category.id} key={category.id}>{category.name}</option>)}
+                </select>
+              </div>
+            )}
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status</Label>
+              <select id="status" name="status" defaultValue={article?.status ?? "draft"} className="h-10 rounded-md border bg-background px-3 text-sm">
+                {statuses.map((status) => <option value={status} key={status}>{status}</option>)}
+              </select>
+            </div>
+            <Field label="Publication Date" name="publishedAt" defaultValue={publishedAt} type="date" required />
           </div>
-        ) : <div className="grid gap-2">
-          <Label htmlFor="categoryId">Category</Label>
-          <select
-            id="categoryId"
-            name="categoryId"
-            defaultValue={article?.categoryId}
-            required
-            className="h-10 rounded-md border bg-background px-3 text-sm"
-          >
-            <option value="">Select category</option>
-            {(categories ?? []).map((category) => (
-              <option value={category.id} key={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>}
-        <Field label="Author" name="author" defaultValue={article?.author ?? undefined} />
-        <Field label="Published Date" name="publishedAt" defaultValue={publishedAt} type="date" required />
-        <Field label="Club Name" name="clubName" defaultValue={article?.clubName ?? undefined} />
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="City" name="city" defaultValue={article?.city ?? undefined} />
-          <Field label="State" name="state" defaultValue={article?.state ?? undefined} />
         </div>
-        <Field label="Tags" name="tags" defaultValue={article?.tags.join(", ")} placeholder="governance, capital planning" />
-        <div className="grid gap-2">
-          <Label htmlFor="heroImageId">Lead Photo</Label>
-          <select
-            id="heroImageId"
-            name="heroImageId"
-            defaultValue={article?.heroImageId ?? ""}
-            className="h-10 rounded-md border bg-background px-3 text-sm"
-          >
-            <option value="">Use category default</option>
-            {mediaAssets.map((asset) => (
-              <option value={asset.id} key={asset.id}>
-                {asset.title}
-              </option>
-            ))}
-          </select>
-        </div>
-        <Field
-          label="Importance Score"
-          name="importanceScore"
-          type="number"
-          min="0"
-          max="100"
-          defaultValue={String(article?.importanceScore ?? 50)}
+      </EditorSection>
+
+      <EditorSection eyebrow="Executive Summary" title="The full story at a glance" description="2-3 short paragraphs a senior reader can absorb in 30 seconds.">
+        <AdminAiTextField
+          id="aiSummary"
+          name="aiSummary"
+          label="Executive summary"
+          defaultValue={article?.aiSummary}
           required
+          rows={7}
+          actions={["expand", "rewrite", "shorten", "improve_executive_summary"]}
+          articleTitle={article?.title}
         />
-        <div className="grid gap-2">
-          <Label htmlFor="status">Status</Label>
-          <select
-            id="status"
-            name="status"
-            defaultValue={article?.status ?? "draft"}
-            className="h-10 rounded-md border bg-background px-3 text-sm"
-          >
-            {statuses.map((status) => (
-              <option value={status} key={status}>
-                {status}
-              </option>
-            ))}
-          </select>
+      </EditorSection>
+
+      <EditorSection eyebrow="What Happened" title="The factual account" description="Grounded strictly in source material — elaborate, never invent.">
+        <AdminAiTextField
+          id="aiWhatHappened"
+          name="aiWhatHappened"
+          label="What happened"
+          defaultValue={article?.aiWhatHappened}
+          rows={8}
+          actions={["expand", "rewrite", "shorten"]}
+          articleTitle={article?.title}
+          placeholder="Generated automatically during RSS ingestion. Falls back to the original excerpt on the public page if left blank."
+        />
+      </EditorSection>
+
+      <EditorSection eyebrow="Why It Matters" title="The analysis" description="Implications for executives, GMs, owners, developers, investors, architects, and operators — not a restatement of the news.">
+        <AdminAiTextField
+          id="aiWhyItMatters"
+          name="aiWhyItMatters"
+          label="Why it matters"
+          defaultValue={article?.aiWhyItMatters}
+          rows={8}
+          actions={["expand", "rewrite", "shorten", "improve_why_it_matters"]}
+          articleTitle={article?.title}
+          placeholder="Generated automatically during RSS ingestion. Falls back to a default framing on the public page if left blank."
+        />
+      </EditorSection>
+
+      <EditorSection eyebrow="Industry Context" title="Optional broader context" description="Comparable clubs, market trends, or capital context — leave blank if there's nothing meaningful to add.">
+        <AdminAiTextField
+          id="aiIndustryContext"
+          name="aiIndustryContext"
+          label="Industry context"
+          defaultValue={article?.aiIndustryContext}
+          rows={5}
+          actions={["expand", "rewrite", "shorten"]}
+          articleTitle={article?.title}
+        />
+      </EditorSection>
+
+      <EditorSection eyebrow="Key Takeaways" title="Skimmable bullet points" description="3-5 concrete takeaways an executive could read in 10 seconds.">
+        <AdminKeyTakeawaysField name="aiKeyTakeaways" defaultValue={article?.aiKeyTakeaways ?? []} />
+      </EditorSection>
+
+      <EditorSection eyebrow="Entity Tagging" title="Clubs, companies, and people" description="Connects this briefing into the Intelligence Graph for future profile pages and search.">
+        <AdminEntityTagging
+          clubs={entityOptions.clubs}
+          companies={entityOptions.companies}
+          people={entityOptions.people}
+          selectedClubIds={article?.clubs.map((club) => club.id) ?? []}
+          selectedCompanyIds={article?.companies.map((company) => company.id) ?? []}
+          selectedPersonIds={article?.people.map((person) => person.id) ?? []}
+        />
+      </EditorSection>
+
+      <EditorSection eyebrow="Article Metadata" title="Supporting details">
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="Dek / Subtitle" name="dek" defaultValue={article?.dek ?? undefined} placeholder="One-sentence subtitle shown under the headline" />
+          <Field label="Original URL" name="originalUrl" defaultValue={article?.originalUrl} type="url" required />
+          <Field label="Author" name="author" defaultValue={article?.author ?? undefined} />
+          <Field label="Club Name" name="clubName" defaultValue={article?.clubName ?? undefined} />
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="City" name="city" defaultValue={article?.city ?? undefined} />
+            <Field label="State" name="state" defaultValue={article?.state ?? undefined} />
+          </div>
+          <Field label="Tags" name="tags" defaultValue={article?.tags.join(", ")} placeholder="governance, capital planning" />
+          <div className="grid gap-2">
+            <Label htmlFor="heroImageId">Lead Photo</Label>
+            <select id="heroImageId" name="heroImageId" defaultValue={article?.heroImageId ?? ""} className="h-10 rounded-md border bg-background px-3 text-sm">
+              <option value="">Use category default</option>
+              {mediaAssets.map((asset) => <option value={asset.id} key={asset.id}>{asset.title}</option>)}
+            </select>
+          </div>
+          <Field label="Importance Score" name="importanceScore" type="number" min="0" max="100" defaultValue={String(article?.importanceScore ?? 50)} required />
         </div>
+        <div className="mt-4 grid gap-2">
+          <Label htmlFor="originalExcerpt">Original RSS Excerpt</Label>
+          <Textarea id="originalExcerpt" name="originalExcerpt" defaultValue={article?.originalExcerpt ?? undefined} rows={3} />
+        </div>
+      </EditorSection>
+
+      <div className="sticky bottom-4 flex justify-end rounded-lg border bg-white/95 p-4 shadow-lg backdrop-blur">
+        <Button type="submit" size="lg">{article ? "Update Article" : "Create Article"}</Button>
       </div>
-      <div className="grid gap-2">
-        <Label htmlFor="originalExcerpt">Original Excerpt</Label>
-        <Textarea id="originalExcerpt" name="originalExcerpt" defaultValue={article?.originalExcerpt ?? undefined} />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="aiSummary">AI Summary (Executive Summary)</Label>
-        <Textarea id="aiSummary" name="aiSummary" defaultValue={article?.aiSummary} required />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="aiWhatHappened">AI: What Happened</Label>
-        <Textarea id="aiWhatHappened" name="aiWhatHappened" defaultValue={article?.aiWhatHappened ?? undefined} placeholder="Generated automatically during RSS ingestion. Leave blank to fall back to the original excerpt." />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="aiWhyItMatters">AI: Why It Matters</Label>
-        <Textarea id="aiWhyItMatters" name="aiWhyItMatters" defaultValue={article?.aiWhyItMatters ?? undefined} placeholder="Generated automatically during RSS ingestion. Leave blank to fall back to the default framing." />
-      </div>
-      <Button type="submit">{article ? "Update Article" : "Create Article"}</Button>
     </form>
   );
 }

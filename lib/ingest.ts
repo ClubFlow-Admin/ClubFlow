@@ -125,9 +125,12 @@ export async function runRssIngestion(): Promise<IngestRunSummary> {
         const slug = await uniqueSlug(slugify(item.title));
         const fallbackSummary = item.excerpt?.trim() || item.title;
 
+        let dek: string | null = null;
         let aiSummary = fallbackSummary;
         let aiWhatHappened: string | null = null;
         let aiWhyItMatters: string | null = null;
+        let aiKeyTakeaways: string[] = [];
+        let aiIndustryContext: string | null = null;
         let city: string | null = null;
         let state: string | null = null;
         let status: ArticleStatus = ArticleStatus.draft;
@@ -141,9 +144,12 @@ export async function runRssIngestion(): Promise<IngestRunSummary> {
         try {
           const brief = await generateEditorialBrief({ title: item.title, excerpt: item.excerpt, source: source.name });
           if (brief) {
+            dek = brief.dek || null;
             aiSummary = brief.executiveSummary || fallbackSummary;
             aiWhatHappened = brief.whatHappened || null;
             aiWhyItMatters = brief.whyItMatters || null;
+            aiKeyTakeaways = brief.keyTakeaways;
+            aiIndustryContext = brief.industryContext || null;
             city = brief.location.city || null;
             state = brief.location.state || null;
             status = ArticleStatus.reviewed;
@@ -164,6 +170,7 @@ export async function runRssIngestion(): Promise<IngestRunSummary> {
         await prisma.article.create({
           data: {
             title: item.title,
+            dek,
             slug,
             originalUrl: item.originalUrl,
             publishedAt: item.publishedAt ?? new Date(),
@@ -171,6 +178,8 @@ export async function runRssIngestion(): Promise<IngestRunSummary> {
             aiSummary,
             aiWhatHappened,
             aiWhyItMatters,
+            aiKeyTakeaways,
+            aiIndustryContext,
             city,
             state,
             status,

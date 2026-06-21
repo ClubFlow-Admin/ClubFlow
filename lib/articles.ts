@@ -24,6 +24,15 @@ export async function getSources() {
   return prisma.source.findMany({ orderBy: { name: "asc" } });
 }
 
+export async function getEntityTaggingOptions() {
+  const [clubs, companies, people] = await Promise.all([
+    prisma.club.findMany({ where: { status: "active" }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.company.findMany({ where: { status: "active" }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.person.findMany({ where: { status: "active" }, orderBy: [{ lastName: "asc" }, { firstName: "asc" }], select: { id: true, firstName: true, lastName: true } })
+  ]);
+  return { clubs, companies, people };
+}
+
 export async function getArticles(filters: ArticleFilters = {}) {
   const where: Prisma.ArticleWhereInput = {};
 

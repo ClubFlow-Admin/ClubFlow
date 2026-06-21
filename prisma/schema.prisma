@@ -26,6 +26,7 @@ enum EntityStatus {
 model Article {
   id              String        @id @default(cuid())
   title           String
+  dek             String?
   slug            String        @unique
   originalUrl     String        @unique
   author          String?
@@ -38,6 +39,8 @@ model Article {
   aiSummary       String
   aiWhatHappened  String?
   aiWhyItMatters  String?
+  aiKeyTakeaways  String[]      @default([])
+  aiIndustryContext String?
   importanceScore Int           @default(50)
   status          ArticleStatus @default(draft)
   createdAt       DateTime      @default(now())
