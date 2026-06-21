@@ -9,6 +9,7 @@ import {
   Edit,
   FileClock,
   Headphones,
+  AlertTriangle,
   Landmark,
   Mail,
   Newspaper,
@@ -20,7 +21,7 @@ import {
 import type { ArticleStatus } from "@prisma/client";
 import { AdminTabs } from "@/components/admin-tabs";
 import { Badge } from "@/components/ui/badge";
-import { adminSections, type AdminSection } from "@/lib/admin-sections";
+import { adminEditHref, adminSections, articleAdminEditHref, type AdminSection } from "@/lib/admin-sections";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -56,17 +57,8 @@ const managedArticleCategorySlugs = adminSections
   .filter((section) => section.kind === "article")
   .map((section) => section.categorySlug);
 
-function sectionSlugForCategory(categorySlug: string) {
-  return adminSections.find((section) => section.kind === "article" && section.categorySlug === categorySlug)?.slug;
-}
-
 function sectionLabelForCategory(categorySlug: string) {
   return adminSections.find((section) => section.kind === "article" && section.categorySlug === categorySlug)?.label;
-}
-
-function editHrefForCategory(categorySlug: string, id: string) {
-  const sectionSlug = sectionSlugForCategory(categorySlug);
-  return sectionSlug ? `/admin/${sectionSlug}/${id}/edit` : undefined;
 }
 
 export default async function AdminDashboard() {
@@ -84,16 +76,17 @@ export default async function AdminDashboard() {
     totalRankingEntries,
     totalPodcastEpisodes,
     newsletterSubscribers,
-    unpublishedJobs,
-    unpublishedExecutiveMoves,
-    unpublishedRankings,
-    unpublishedPodcasts,
+    attentionJobs,
+    attentionExecutiveMoves,
+    attentionRankings,
+    attentionPodcasts,
     recentArticles,
     recentJobs,
     recentExecutiveMoves,
     recentDevelopments,
     draftArticles,
-    reviewedArticles
+    reviewedArticles,
+    unmanagedArticles
   ] = await Promise.all([
     Promise.all(adminSections.map(sectionCounts)),
     prisma.article.count({ where: { status: "published" } }),
@@ -108,10 +101,10 @@ export default async function AdminDashboard() {
     prisma.rankingEntry.count(),
     prisma.podcastEpisode.count(),
     prisma.newsletterSubscriber.count({ where: { active: true } }),
-    prisma.jobPosting.count({ where: { status: { not: "published" } } }),
-    prisma.executiveMove.count({ where: { status: { not: "published" } } }),
-    prisma.rankingEntry.count({ where: { status: { not: "published" } } }),
-    prisma.podcastEpisode.count({ where: { status: { not: "published" } } }),
+    prisma.jobPosting.findMany({ where: { status: { not: "published" } }, orderBy: { updatedAt: "desc" }, take: 6 }),
+    prisma.executiveMove.findMany({ where: { status: { not: "published" } }, orderBy: { updatedAt: "desc" }, take: 6 }),
+    prisma.rankingEntry.findMany({ where: { status: { not: "published" } }, orderBy: { updatedAt: "desc" }, take: 6 }),
+    prisma.podcastEpisode.findMany({ where: { status: { not: "published" } }, orderBy: { updatedAt: "desc" }, take: 6 }),
     prisma.article.findMany({
       where: { category: { slug: { in: managedArticleCategorySlugs } } },
       orderBy: { updatedAt: "desc" },
@@ -136,6 +129,12 @@ export default async function AdminDashboard() {
       where: { status: "reviewed", category: { slug: { in: managedArticleCategorySlugs } } },
       orderBy: { updatedAt: "desc" },
       take: 6,
+      include: { category: true }
+    }),
+    prisma.article.findMany({
+      where: { status: { in: ["draft", "reviewed"] }, category: { slug: { notIn: managedArticleCategorySlugs } } },
+      orderBy: { updatedAt: "desc" },
+      take: 4,
       include: { category: true }
     })
   ]);
@@ -167,16 +166,16 @@ export default async function AdminDashboard() {
       section: sectionLabelForCategory(a.category.slug) ?? a.category.name,
       status: a.status,
       date: a.updatedAt,
-      href: editHrefForCategory(a.category.slug, a.id)
+      href: articleAdminEditHref(a.category.slug, a.id)
     })),
-    ...recentJobs.map((j) => ({ id: j.id, title: j.title, section: "Jobs", status: j.status, date: j.updatedAt, href: `/admin/jobs/${j.id}/edit` })),
+    ...recentJobs.map((j) => ({ id: j.id, title: j.title, section: "Jobs", status: j.status, date: j.updatedAt, href: adminEditHref("jobs", j.id) })),
     ...recentExecutiveMoves.map((e) => ({
       id: e.id,
       title: `${e.executive} — ${e.newRole}`,
       section: "Executive Moves",
       status: e.status,
       date: e.updatedAt,
-      href: `/admin/executive-moves/${e.id}/edit`
+      href: adminEditHref("executive-moves", e.id)
     })),
     ...recentDevelopments.map((d) => ({
       id: d.id,
@@ -184,7 +183,7 @@ export default async function AdminDashboard() {
       section: "Club Developments",
       status: d.status,
       date: d.updatedAt,
-      href: `/admin/developments/${d.id}/edit`
+      href: articleAdminEditHref(d.category.slug, d.id)
     }))
   ]
     .filter((row): row is ActivityRow & { href: string } => Boolean(row.href))
@@ -192,11 +191,13 @@ export default async function AdminDashboard() {
     .slice(0, 10);
 
   const needsAttention = [
-    ...draftArticles.map((a) => ({ id: a.id, title: a.title, section: sectionLabelForCategory(a.category.slug) ?? a.category.name, status: a.status, href: editHrefForCategory(a.category.slug, a.id) })),
-    ...reviewedArticles.map((a) => ({ id: a.id, title: a.title, section: sectionLabelForCategory(a.category.slug) ?? a.category.name, status: a.status, href: editHrefForCategory(a.category.slug, a.id) }))
-  ]
-    .filter((row): row is { id: string; title: string; section: string; status: ArticleStatus; href: string } => Boolean(row.href))
-    .slice(0, 8);
+    ...draftArticles.map((a) => ({ id: a.id, title: a.title, section: sectionLabelForCategory(a.category.slug)!, status: a.status, date: a.updatedAt, href: articleAdminEditHref(a.category.slug, a.id)! })),
+    ...reviewedArticles.map((a) => ({ id: a.id, title: a.title, section: sectionLabelForCategory(a.category.slug)!, status: a.status, date: a.updatedAt, href: articleAdminEditHref(a.category.slug, a.id)! })),
+    ...attentionJobs.map((item) => ({ id: item.id, title: item.title, section: "Jobs", status: item.status, date: item.updatedAt, href: adminEditHref("jobs", item.id)! })),
+    ...attentionExecutiveMoves.map((item) => ({ id: item.id, title: `${item.executive} — ${item.newRole}`, section: "Executive Moves", status: item.status, date: item.updatedAt, href: adminEditHref("executive-moves", item.id)! })),
+    ...attentionRankings.map((item) => ({ id: item.id, title: `#${item.rank} ${item.clubName}`, section: "Club Rankings", status: item.status, date: item.updatedAt, href: adminEditHref("club-rankings", item.id)! })),
+    ...attentionPodcasts.map((item) => ({ id: item.id, title: item.title, section: "Podcasts", status: item.status, date: item.updatedAt, href: adminEditHref("podcasts", item.id)! }))
+  ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 8);
 
   return (
     <main className="container-shell py-8">
@@ -308,16 +309,16 @@ export default async function AdminDashboard() {
                 <StatusBadge status={row.status} />
               </Link>
             ))}
-            <div className="intelligence-card p-4">
-              <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Unpublished elsewhere</div>
-              <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                <Counter label="Jobs" value={unpublishedJobs} />
-                <Counter label="Executive Moves" value={unpublishedExecutiveMoves} />
-                <Counter label="Rankings" value={unpublishedRankings} />
-                <Counter label="Podcasts" value={unpublishedPodcasts} />
+            {unmanagedArticles.map((row) => (
+              <div key={row.id} className="intelligence-card flex items-start gap-3 border-amber-200 bg-amber-50/50 p-4">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
+                <div>
+                  <div className="text-sm font-bold">{row.title}</div>
+                  <div className="mt-1 text-xs leading-5 text-amber-800">Legacy {row.category.name} article — no section editor is available. This item is intentionally not linked.</div>
+                </div>
               </div>
-            </div>
-            {!needsAttention.length ? (
+            ))}
+            {!needsAttention.length && !unmanagedArticles.length ? (
               <div className="intelligence-card p-6 text-center text-sm text-muted-foreground">All caught up — nothing waiting.</div>
             ) : null}
           </div>
@@ -356,15 +357,6 @@ export default async function AdminDashboard() {
         </div>
       </section>
     </main>
-  );
-}
-
-function Counter({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <div className="number-tabular text-lg font-black">{value}</div>
-      <div className="text-[11px] uppercase text-muted-foreground">{label}</div>
-    </div>
   );
 }
 

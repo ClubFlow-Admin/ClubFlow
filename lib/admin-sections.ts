@@ -21,3 +21,13 @@ export function getAdminSection(slug: string) {
 export function adminSectionForCategory(categorySlug: string) {
   return adminSections.find((section) => section.kind === "article" && section.categorySlug === categorySlug);
 }
+
+export function adminEditHref(sectionSlug: string, id: string) {
+  const section = getAdminSection(sectionSlug);
+  return section ? `/admin/${section.slug}/${id}/edit` : undefined;
+}
+
+export function articleAdminEditHref(categorySlug: string, id: string) {
+  const section = adminSectionForCategory(categorySlug);
+  return section ? adminEditHref(section.slug, id) : undefined;
+}
