@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { LockKeyhole } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +9,15 @@ import { isSitePrivate } from "@/lib/site-auth";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | undefined>>;
+};
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+    nosnippet: true
+  }
 };
 
 export default async function PrivateAccessPage({ searchParams }: PageProps) {
