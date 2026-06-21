@@ -71,14 +71,24 @@ model MediaAsset {
 }
 
 model Source {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  homepageUrl String?
-  rssUrl      String?
-  notes       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  articles    Article[]
+  id                     String    @id @default(cuid())
+  name                   String    @unique
+  homepageUrl            String?
+  rssUrl                 String?
+  sourceType             String    @default("other")
+  primaryCategory        String?
+  categories             String[]  @default([])
+  priority               Int       @default(50)
+  active                 Boolean   @default(true)
+  lastCheckedAt          DateTime?
+  lastSuccessfulImportAt DateTime?
+  notes                  String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  articles               Article[]
+
+  @@index([active, sourceType])
+  @@index([primaryCategory])
 }
 
 model Category {

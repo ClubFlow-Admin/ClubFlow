@@ -15,6 +15,13 @@ CREATE TABLE IF NOT EXISTS "Source" (
   "name" TEXT NOT NULL UNIQUE,
   "homepageUrl" TEXT,
   "rssUrl" TEXT,
+  "sourceType" TEXT NOT NULL DEFAULT 'other',
+  "primaryCategory" TEXT,
+  "categories" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+  "priority" INTEGER NOT NULL DEFAULT 50,
+  "active" BOOLEAN NOT NULL DEFAULT true,
+  "lastCheckedAt" TIMESTAMP(3),
+  "lastSuccessfulImportAt" TIMESTAMP(3),
   "notes" TEXT,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL
@@ -177,6 +184,14 @@ CREATE TABLE IF NOT EXISTS "PodcastEpisode" (
   "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
+ALTER TABLE "Source" ADD COLUMN IF NOT EXISTS "sourceType" TEXT NOT NULL DEFAULT 'other';
+ALTER TABLE "Source" ADD COLUMN IF NOT EXISTS "primaryCategory" TEXT;
+ALTER TABLE "Source" ADD COLUMN IF NOT EXISTS "categories" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];
+ALTER TABLE "Source" ADD COLUMN IF NOT EXISTS "priority" INTEGER NOT NULL DEFAULT 50;
+ALTER TABLE "Source" ADD COLUMN IF NOT EXISTS "active" BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE "Source" ADD COLUMN IF NOT EXISTS "lastCheckedAt" TIMESTAMP(3);
+ALTER TABLE "Source" ADD COLUMN IF NOT EXISTS "lastSuccessfulImportAt" TIMESTAMP(3);
+
 CREATE INDEX IF NOT EXISTS "Article_status_publishedAt_idx" ON "Article"("status", "publishedAt");
 CREATE INDEX IF NOT EXISTS "Article_categoryId_idx" ON "Article"("categoryId");
 CREATE INDEX IF NOT EXISTS "Article_sourceId_idx" ON "Article"("sourceId");
@@ -184,6 +199,8 @@ CREATE INDEX IF NOT EXISTS "Article_heroImageId_idx" ON "Article"("heroImageId")
 CREATE INDEX IF NOT EXISTS "Article_clubName_idx" ON "Article"("clubName");
 CREATE INDEX IF NOT EXISTS "Article_city_state_idx" ON "Article"("city", "state");
 CREATE INDEX IF NOT EXISTS "MediaAsset_category_idx" ON "MediaAsset"("category");
+CREATE INDEX IF NOT EXISTS "Source_active_sourceType_idx" ON "Source"("active", "sourceType");
+CREATE INDEX IF NOT EXISTS "Source_primaryCategory_idx" ON "Source"("primaryCategory");
 CREATE UNIQUE INDEX IF NOT EXISTS "JobPosting_title_clubName_key" ON "JobPosting"("title", "clubName");
 CREATE INDEX IF NOT EXISTS "RankingEntry_category_rank_idx" ON "RankingEntry"("category", "rank");
 
