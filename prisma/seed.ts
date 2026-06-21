@@ -130,6 +130,28 @@ const podcasts = [
   ["ClubOpsPro Sessions", "The Weekly Operating Rhythm That Actually Works", "A practical session on meetings, dashboards, ownership, and follow-through across department heads.", "18 min"]
 ] as const;
 
+const clubs = [
+  ["High Hampton", "Cashiers, North Carolina", "Cashiers", "North Carolina", "United States", "destination-resort", 1933, 18, "A historic Western North Carolina mountain resort known for its golf course and member/guest hybrid model."],
+  ["Pinehurst Resort", "Pinehurst, North Carolina", "Pinehurst", "North Carolina", "United States", "destination-resort", 1895, 9, "A multi-course destination resort and longtime US Open and major-championship host."],
+  ["Bandon Dunes", "Bandon, Oregon", "Bandon", "Oregon", "United States", "destination-resort", 1999, 6, "A walking-only links destination on the Oregon coast built around multiple standalone courses."],
+  ["Oakmont Country Club", "Oakmont, Pennsylvania", "Oakmont", "Pennsylvania", "United States", "private-club", 1903, 18, "A storied private club and frequent major-championship venue near Pittsburgh."]
+] as const;
+
+const companies = [
+  ["Troon", "club-management", "Scottsdale, Arizona", "A global club and resort management company operating private, resort, and daily-fee properties."],
+  ["KemperSports", "club-management", "Northbrook, Illinois", "A management company operating golf courses, clubs, and resorts across the United States."],
+  ["Clubessential", "technology-vendor", "Cincinnati, Ohio", "A private club technology platform spanning member management, point of sale, and websites."],
+  ["Jonas Club Software", "technology-vendor", "Markham, Ontario", "A club management software provider serving private clubs, associations, and resorts."],
+  ["Toro", "course-maintenance", "Bloomington, Minnesota", "A manufacturer of turf maintenance, irrigation, and grounds equipment used across golf operations."]
+] as const;
+
+const people = [
+  ["Alex", "Morgan", "General Manager", "High Hampton", "https://www.linkedin.com/in/example-alex-morgan"],
+  ["Jordan", "Reyes", "Director of Golf Course Maintenance", "Pinehurst Resort", null],
+  ["Taylor", "Whitfield", "Chief Operating Officer", "Troon", "https://www.linkedin.com/in/example-taylor-whitfield"],
+  ["Casey", "Nakamura", "Vice President of Technology", "Clubessential", null]
+] as const;
+
 async function main() {
   const categoryRecords = await Promise.all(categories.map(([name, slug, description]) => prisma.category.upsert({ where: { slug }, update: { name, description }, create: { name, slug, description } })));
   const sourceRecords = await Promise.all(sources.map(([name, homepageUrl, rssUrl]) => prisma.source.upsert({ where: { name }, update: { homepageUrl, rssUrl }, create: { name, homepageUrl, rssUrl } })));
@@ -155,6 +177,19 @@ async function main() {
   for (const [category, rank, clubName, city, state, score, rationale] of rankings) await prisma.rankingEntry.upsert({ where: { category_clubName: { category, clubName } }, update: { rank, city, state, score, rationale, publishedAt: new Date("2026-06-15"), status: ArticleStatus.published }, create: { category, rank, clubName, city, state, score, rationale, publishedAt: new Date("2026-06-15"), status: ArticleStatus.published } });
   for (const [showName, title, description, duration] of podcasts) await prisma.podcastEpisode.upsert({ where: { title }, update: { showName, description, duration, comingSoon: true, status: ArticleStatus.published }, create: { showName, title, description, duration, comingSoon: true, status: ArticleStatus.published } });
   await prisma.newsletterSubscriber.upsert({ where: { email: "gm@harborpoint.example" }, update: { frequency: NewsletterFrequency.weekly }, create: { email: "gm@harborpoint.example", frequency: NewsletterFrequency.weekly } });
+
+  for (const [name, location, city, state, country, clubType, foundedYear, holes, description] of clubs) {
+    const slug = slugify(name);
+    await prisma.club.upsert({ where: { slug }, update: { location, city, state, country, clubType, foundedYear, holes, description }, create: { name, slug, location, city, state, country, clubType, foundedYear, holes, description } });
+  }
+  for (const [name, industry, headquarters, description] of companies) {
+    const slug = slugify(name);
+    await prisma.company.upsert({ where: { slug }, update: { industry, headquarters, description }, create: { name, slug, industry, headquarters, description } });
+  }
+  for (const [firstName, lastName, title, currentOrganization, linkedInUrl] of people) {
+    const slug = slugify(`${firstName} ${lastName}`);
+    await prisma.person.upsert({ where: { slug }, update: { title, currentOrganization, linkedInUrl }, create: { firstName, lastName, slug, title, currentOrganization, linkedInUrl } });
+  }
 }
 
 main().then(() => prisma.$disconnect()).catch(async (error) => { console.error(error); await prisma.$disconnect(); process.exit(1); });

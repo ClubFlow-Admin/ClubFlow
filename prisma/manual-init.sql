@@ -210,3 +210,85 @@ ALTER TABLE "ExecutiveMove" ADD COLUMN IF NOT EXISTS "publishedAt" TIMESTAMP(3);
 ALTER TABLE "RankingEntry" ADD COLUMN IF NOT EXISTS "status" "ArticleStatus" NOT NULL DEFAULT 'draft';
 ALTER TABLE "RankingEntry" ADD COLUMN IF NOT EXISTS "publishedAt" TIMESTAMP(3);
 ALTER TABLE "PodcastEpisode" ADD COLUMN IF NOT EXISTS "status" "ArticleStatus" NOT NULL DEFAULT 'draft';
+
+DO $$ BEGIN
+  CREATE TYPE "EntityStatus" AS ENUM ('active', 'inactive');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+
+CREATE TABLE IF NOT EXISTS "Club" (
+  "id" TEXT PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "slug" TEXT NOT NULL UNIQUE,
+  "location" TEXT,
+  "city" TEXT,
+  "state" TEXT,
+  "country" TEXT,
+  "clubType" TEXT,
+  "website" TEXT,
+  "logoUrl" TEXT,
+  "description" TEXT,
+  "foundedYear" INTEGER,
+  "holes" INTEGER,
+  "status" "EntityStatus" NOT NULL DEFAULT 'active',
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "Company" (
+  "id" TEXT PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "slug" TEXT NOT NULL UNIQUE,
+  "industry" TEXT,
+  "website" TEXT,
+  "logoUrl" TEXT,
+  "description" TEXT,
+  "headquarters" TEXT,
+  "status" "EntityStatus" NOT NULL DEFAULT 'active',
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "Person" (
+  "id" TEXT PRIMARY KEY,
+  "firstName" TEXT NOT NULL,
+  "lastName" TEXT NOT NULL,
+  "slug" TEXT NOT NULL UNIQUE,
+  "title" TEXT,
+  "biography" TEXT,
+  "photoUrl" TEXT,
+  "linkedInUrl" TEXT,
+  "currentOrganization" TEXT,
+  "status" "EntityStatus" NOT NULL DEFAULT 'active',
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "_ArticleToClub" (
+  "A" TEXT NOT NULL REFERENCES "Article"("id") ON DELETE CASCADE,
+  "B" TEXT NOT NULL REFERENCES "Club"("id") ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "_ArticleToClub_AB_unique" ON "_ArticleToClub"("A", "B");
+CREATE INDEX IF NOT EXISTS "_ArticleToClub_B_index" ON "_ArticleToClub"("B");
+
+CREATE TABLE IF NOT EXISTS "_ArticleToCompany" (
+  "A" TEXT NOT NULL REFERENCES "Article"("id") ON DELETE CASCADE,
+  "B" TEXT NOT NULL REFERENCES "Company"("id") ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "_ArticleToCompany_AB_unique" ON "_ArticleToCompany"("A", "B");
+CREATE INDEX IF NOT EXISTS "_ArticleToCompany_B_index" ON "_ArticleToCompany"("B");
+
+CREATE TABLE IF NOT EXISTS "_ArticleToPerson" (
+  "A" TEXT NOT NULL REFERENCES "Article"("id") ON DELETE CASCADE,
+  "B" TEXT NOT NULL REFERENCES "Person"("id") ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "_ArticleToPerson_AB_unique" ON "_ArticleToPerson"("A", "B");
+CREATE INDEX IF NOT EXISTS "_ArticleToPerson_B_index" ON "_ArticleToPerson"("B");
+
+CREATE INDEX IF NOT EXISTS "Club_status_idx" ON "Club"("status");
+CREATE INDEX IF NOT EXISTS "Club_city_state_idx" ON "Club"("city", "state");
+CREATE INDEX IF NOT EXISTS "Company_status_idx" ON "Company"("status");
+CREATE INDEX IF NOT EXISTS "Company_industry_idx" ON "Company"("industry");
+CREATE INDEX IF NOT EXISTS "Person_status_idx" ON "Person"("status");
+CREATE INDEX IF NOT EXISTS "Person_lastName_firstName_idx" ON "Person"("lastName", "firstName");

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Database, LayoutDashboard, LogOut, Rss } from "lucide-react";
+import { Briefcase, Building2, Database, LayoutDashboard, LogOut, Rss, UserRound } from "lucide-react";
 import { signOutAdmin } from "@/app/admin/login/actions";
 import { Button } from "@/components/ui/button";
 import { adminSections } from "@/lib/admin-sections";
@@ -9,6 +9,9 @@ import { adminSections } from "@/lib/admin-sections";
 const utilityTabs = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Sources", href: "/admin/sources", icon: Rss },
+  { label: "Clubs", href: "/admin/clubs", icon: Building2 },
+  { label: "Companies", href: "/admin/companies", icon: Briefcase },
+  { label: "People", href: "/admin/people", icon: UserRound },
   { label: "Backend", href: "/admin/backend", icon: Database }
 ];
 

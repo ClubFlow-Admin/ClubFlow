@@ -18,6 +18,11 @@ enum NewsletterFrequency {
   weekly
 }
 
+enum EntityStatus {
+  active
+  inactive
+}
+
 model Article {
   id              String        @id @default(cuid())
   title           String
@@ -46,6 +51,10 @@ model Article {
   executiveMove     ExecutiveMove?
   developmentProject DevelopmentProject?
   newsletterStories  NewsletterStory[]
+
+  clubs    Club[]
+  companies Company[]
+  people    Person[]
 
   @@index([status, publishedAt])
   @@index([categoryId])
@@ -199,6 +208,69 @@ model RankingEntry {
 
   @@unique([category, clubName])
   @@index([category, rank])
+}
+
+model Club {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  location    String?
+  city        String?
+  state       String?
+  country     String?
+  clubType    String?
+  website     String?
+  logoUrl     String?
+  description String?
+  foundedYear Int?
+  holes       Int?
+  status      EntityStatus @default(active)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  articles Article[]
+
+  @@index([status])
+  @@index([city, state])
+}
+
+model Company {
+  id            String       @id @default(cuid())
+  name          String
+  slug          String       @unique
+  industry      String?
+  website       String?
+  logoUrl       String?
+  description   String?
+  headquarters  String?
+  status        EntityStatus @default(active)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  articles Article[]
+
+  @@index([status])
+  @@index([industry])
+}
+
+model Person {
+  id                  String       @id @default(cuid())
+  firstName           String
+  lastName            String
+  slug                String       @unique
+  title               String?
+  biography           String?
+  photoUrl            String?
+  linkedInUrl         String?
+  currentOrganization String?
+  status              EntityStatus @default(active)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  articles Article[]
+
+  @@index([status])
+  @@index([lastName, firstName])
 }
 
 model PodcastEpisode {
