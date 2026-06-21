@@ -1,15 +1,10 @@
-import { SectionFeedPage } from "@/components/section-feed-page";
-import { sectionPages } from "@/lib/categories";
+import { format } from "date-fns";
+import { ArrowRight, UserRoundPlus } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { formatLocation } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
-
-type PageProps = {
-  searchParams: Promise<Record<string, string | undefined>>;
-};
-
-export default async function ExecutiveMovesPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const section = sectionPages["executive-moves"];
-
-  return <SectionFeedPage {...section} categorySlug={section.slug} searchParams={params} />;
+export default async function ExecutiveMovesPage() {
+  const moves = await prisma.executiveMove.findMany({ orderBy: [{ effectiveAt: "desc" }, { updatedAt: "desc" }] });
+  return <main><section className="border-b bg-ink text-white"><div className="container-shell grid gap-8 py-12 lg:grid-cols-[1fr_320px]"><div><div className="text-xs font-black uppercase tracking-[.18em] text-sky-300">Leadership Monitor</div><h1 className="font-serif mt-3 text-balance text-4xl font-black sm:text-5xl">Executive Moves</h1><p className="mt-4 max-w-3xl text-lg leading-8 text-white/65">Appointments and leadership transitions shaping strategy, culture, and operating capacity across private clubs.</p></div><div className="flex items-center gap-4 border border-white/15 bg-white/[.04] p-6"><UserRoundPlus className="h-10 w-10 text-sky-300" /><div><div className="number-tabular text-4xl font-black">{moves.length}</div><div className="text-xs font-bold uppercase tracking-wide text-white/50">Moves tracked</div></div></div></div></section><section className="container-shell py-10"><div className="mb-6 flex flex-wrap gap-2">{["General Managers", "Operations", "Culinary", "Golf", "Finance", "Technology"].map((label) => <span key={label} className="rounded-full border bg-white px-3 py-1.5 text-xs font-bold">{label}</span>)}</div><div className="grid gap-4 md:grid-cols-2">{moves.map((move) => <article key={move.id} className="intelligence-card p-6"><div className="flex items-center justify-between gap-3"><span className="text-xs font-black uppercase tracking-wide text-primary">{move.effectiveAt ? format(move.effectiveAt, "MMM d, yyyy") : "Recently announced"}</span><span className="text-xs font-bold text-muted-foreground">{formatLocation(move.city, move.state)}</span></div><h2 className="font-serif mt-4 text-2xl font-black">{move.executive}</h2><div className="mt-2 font-black text-primary">{move.newRole}</div><div className="mt-1 text-sm font-bold">{move.clubName}</div>{move.previousRole ? <div className="mt-4 flex items-center gap-2 border-t pt-4 text-sm text-muted-foreground"><span>{move.previousRole}</span><ArrowRight className="h-4 w-4" /><span>{move.newRole}</span></div> : null}{move.notes ? <p className="mt-3 text-sm leading-6 text-muted-foreground">{move.notes}</p> : null}</article>)}{!moves.length ? <div className="border bg-white p-8 text-muted-foreground">No executive moves are currently indexed.</div> : null}</div></section></main>;
 }

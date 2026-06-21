@@ -26,6 +26,7 @@
 
 body {
   @apply bg-background text-foreground antialiased;
+  background-image: radial-gradient(circle at 12% -20%, rgba(11, 91, 77, .08), transparent 32rem);
 }
 
 a {
@@ -35,3 +36,15 @@ a {
 .container-shell {
   @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
 }
+
+.font-serif { font-family: Georgia, "Times New Roman", serif; }
+.bg-ink { background: #121923; }
+.text-balance { text-wrap: balance; }
+.site-header { position: relative; z-index: 40; box-shadow: 0 1px 0 rgba(15, 23, 42, .06); }
+.kicker { @apply text-xs font-black uppercase text-primary; letter-spacing: .14em; }
+.section-rule { @apply flex items-end justify-between gap-4 border-b-2 border-foreground pb-3; }
+.intelligence-card { @apply border bg-white; border-radius: 2px; box-shadow: 0 8px 30px rgba(15, 23, 42, .05); }
+.metric-grid { @apply grid grid-cols-2 gap-px overflow-hidden border bg-border md:grid-cols-3 lg:grid-cols-6; }
+.metric-cell { @apply bg-white p-4; }
+.metric-cell:hover { background: hsl(var(--muted)); }
+.number-tabular { font-variant-numeric: tabular-nums; }

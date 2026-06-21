@@ -133,6 +133,8 @@ model JobPosting {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@unique([title, clubName])
 }
 
 model ExecutiveMove {
@@ -164,6 +166,35 @@ model DevelopmentProject {
   description String?
   articleId   String?  @unique
   article     Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model RankingEntry {
+  id          String   @id @default(cuid())
+  category    String
+  rank        Int
+  clubName    String
+  city        String?
+  state       String?
+  score       Int?
+  rationale   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([category, clubName])
+  @@index([category, rank])
+}
+
+model PodcastEpisode {
+  id          String   @id @default(cuid())
+  showName    String
+  title       String   @unique
+  description String
+  duration    String?
+  publishedAt DateTime?
+  audioUrl    String?
+  comingSoon  Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

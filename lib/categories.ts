@@ -1,13 +1,14 @@
 export const categoryNav = [
-  { label: "Home Feed", href: "/" },
-  { label: "Industry News", href: "/industry-news" },
+  { label: "Industry", href: "/industry" },
   { label: "Developments", href: "/developments" },
   { label: "Executive Moves", href: "/executive-moves" },
   { label: "Jobs", href: "/jobs" },
   { label: "Technology", href: "/technology" },
-  { label: "Best Practices", href: "/best-practices" },
-  { label: "Rankings & Data", href: "/rankings-data" },
-  { label: "Newsletter", href: "/newsletter" }
+  { label: "M&A", href: "/mergers-acquisitions" },
+  { label: "Capital Investments", href: "/capital-investments" },
+  { label: "Club Rankings", href: "/club-rankings" },
+  { label: "Podcasts", href: "/podcasts" },
+  { label: "ClubOpsPro", href: "/clubopspro" }
 ];
 
 export const sectionPages = {
@@ -42,6 +43,20 @@ export const sectionPages = {
     eyebrow: "Systems & Data",
     description:
       "Software, AI, member experience tools, payments, communications, analytics, and operating technology."
+  },
+  "mergers-acquisitions": {
+    title: "Mergers & Acquisitions",
+    href: "/mergers-acquisitions",
+    slug: "mergers-acquisitions",
+    eyebrow: "Deal Desk",
+    description: "Ownership changes, management agreements, portfolio transactions, and consolidation across the club market."
+  },
+  "capital-investments": {
+    title: "Capital Investments",
+    href: "/capital-investments",
+    slug: "capital-investments",
+    eyebrow: "Capital Monitor",
+    description: "Member-approved projects, reserve strategy, amenity spending, and the investments reshaping club assets."
   },
   "best-practices": {
     title: "Best Practices",

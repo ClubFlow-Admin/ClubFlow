@@ -144,6 +144,33 @@ CREATE TABLE IF NOT EXISTS "DevelopmentProject" (
   "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS "RankingEntry" (
+  "id" TEXT PRIMARY KEY,
+  "category" TEXT NOT NULL,
+  "rank" INTEGER NOT NULL,
+  "clubName" TEXT NOT NULL,
+  "city" TEXT,
+  "state" TEXT,
+  "score" INTEGER,
+  "rationale" TEXT NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL,
+  CONSTRAINT "RankingEntry_category_clubName_key" UNIQUE ("category", "clubName")
+);
+
+CREATE TABLE IF NOT EXISTS "PodcastEpisode" (
+  "id" TEXT PRIMARY KEY,
+  "showName" TEXT NOT NULL,
+  "title" TEXT NOT NULL UNIQUE,
+  "description" TEXT NOT NULL,
+  "duration" TEXT,
+  "publishedAt" TIMESTAMP(3),
+  "audioUrl" TEXT,
+  "comingSoon" BOOLEAN NOT NULL DEFAULT true,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS "Article_status_publishedAt_idx" ON "Article"("status", "publishedAt");
 CREATE INDEX IF NOT EXISTS "Article_categoryId_idx" ON "Article"("categoryId");
 CREATE INDEX IF NOT EXISTS "Article_sourceId_idx" ON "Article"("sourceId");
@@ -151,3 +178,5 @@ CREATE INDEX IF NOT EXISTS "Article_heroImageId_idx" ON "Article"("heroImageId")
 CREATE INDEX IF NOT EXISTS "Article_clubName_idx" ON "Article"("clubName");
 CREATE INDEX IF NOT EXISTS "Article_city_state_idx" ON "Article"("city", "state");
 CREATE INDEX IF NOT EXISTS "MediaAsset_category_idx" ON "MediaAsset"("category");
+CREATE UNIQUE INDEX IF NOT EXISTS "JobPosting_title_clubName_key" ON "JobPosting"("title", "clubName");
+CREATE INDEX IF NOT EXISTS "RankingEntry_category_rank_idx" ON "RankingEntry"("category", "rank");

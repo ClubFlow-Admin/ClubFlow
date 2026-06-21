@@ -1,0 +1,11 @@
+"use server";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+
+const optional = z.string().optional().transform((value) => value?.trim() || null);
+export async function createJob(formData: FormData) { const data = z.object({ title: z.string().min(2), clubName: z.string().min(2), city: optional, state: optional, url: optional, description: optional }).parse(Object.fromEntries(formData)); await prisma.jobPosting.create({ data }); revalidatePath("/admin/intelligence"); revalidatePath("/jobs"); }
+export async function createMove(formData: FormData) { const data = z.object({ executive: z.string().min(2), newRole: z.string().min(2), previousRole: optional, clubName: z.string().min(2), city: optional, state: optional, notes: optional }).parse(Object.fromEntries(formData)); await prisma.executiveMove.create({ data }); revalidatePath("/admin/intelligence"); revalidatePath("/executive-moves"); }
+export async function createDevelopment(formData: FormData) { const data = z.object({ clubName: z.string().min(2), projectName: z.string().min(2), city: optional, state: optional, budget: optional, timeline: optional, status: optional, description: optional }).parse(Object.fromEntries(formData)); await prisma.developmentProject.create({ data }); revalidatePath("/admin/intelligence"); revalidatePath("/developments"); }
+export async function createRanking(formData: FormData) { const data = z.object({ category: z.string().min(2), rank: z.coerce.number().int().positive(), clubName: z.string().min(2), city: optional, state: optional, score: z.preprocess((value) => value === "" ? null : value, z.coerce.number().int().min(0).max(100).nullable()), rationale: z.string().min(10) }).parse(Object.fromEntries(formData)); await prisma.rankingEntry.create({ data }); revalidatePath("/admin/intelligence"); revalidatePath("/club-rankings"); }
+export async function createPodcast(formData: FormData) { const data = z.object({ showName: z.string().min(2), title: z.string().min(2), description: z.string().min(10), duration: optional }).parse(Object.fromEntries(formData)); await prisma.podcastEpisode.create({ data }); revalidatePath("/admin/intelligence"); revalidatePath("/podcasts"); }
