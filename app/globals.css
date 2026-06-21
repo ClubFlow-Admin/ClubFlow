@@ -48,3 +48,11 @@ a {
 .metric-cell { @apply bg-white p-4; }
 .metric-cell:hover { background: hsl(var(--muted)); }
 .number-tabular { font-variant-numeric: tabular-nums; }
+.article-prose h2 { @apply font-serif text-2xl font-black; }
+.article-prose p { @apply mt-3 text-base leading-8 text-muted-foreground; }
+.article-prose > section { @apply border-b pb-8; }
+
+@media (max-width: 639px) {
+  .section-rule { @apply items-start; }
+  .section-rule > a { @apply mt-1 shrink-0; }
+}

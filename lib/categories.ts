@@ -13,7 +13,7 @@ export const categoryNav = [
 
 export const sectionPages = {
   "industry-news": {
-    title: "Industry News",
+    title: "Industry Intelligence",
     href: "/industry-news",
     slug: "industry-news",
     eyebrow: "Market Watch",
@@ -21,7 +21,7 @@ export const sectionPages = {
       "Market, membership, governance, finance, ownership, and broader private club industry coverage."
   },
   developments: {
-    title: "Club Developments & Renovations",
+    title: "Club Development Tracker",
     href: "/developments",
     slug: "developments-renovations",
     eyebrow: "Capital Projects",
@@ -37,7 +37,7 @@ export const sectionPages = {
       "GM, COO, department head, chef, superintendent, board, and vendor leadership changes across the club industry."
   },
   technology: {
-    title: "Technology",
+    title: "Club Technology Desk",
     href: "/technology",
     slug: "technology",
     eyebrow: "Systems & Data",
@@ -45,14 +45,14 @@ export const sectionPages = {
       "Software, AI, member experience tools, payments, communications, analytics, and operating technology."
   },
   "mergers-acquisitions": {
-    title: "Mergers & Acquisitions",
+    title: "Golf & Club Deal Desk",
     href: "/mergers-acquisitions",
     slug: "mergers-acquisitions",
     eyebrow: "Deal Desk",
     description: "Ownership changes, management agreements, portfolio transactions, and consolidation across the club market."
   },
   "capital-investments": {
-    title: "Capital Investments",
+    title: "Capital Project Tracker",
     href: "/capital-investments",
     slug: "capital-investments",
     eyebrow: "Capital Monitor",
@@ -75,3 +75,10 @@ export const sectionPages = {
       "Rankings, benchmarks, surveys, compensation signals, capital data, and performance intelligence."
   }
 } as const;
+
+export function publicHrefForCategory(categorySlug: string) {
+  const page = Object.values(sectionPages).find((section) => section.slug === categorySlug);
+  if (page) return page.href === "/industry-news" ? "/industry" : page.href;
+  if (categorySlug === "clubopspro") return "/clubopspro";
+  return "/industry";
+}
