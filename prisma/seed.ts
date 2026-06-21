@@ -24,13 +24,43 @@ const categories = [
   ["ClubOpsPro", "clubopspro", "Consulting, playbooks, SOPs, leadership resources, and implementation support."]
 ] as const;
 
+const PLACEHOLDER_NOTE =
+  "Demo source used only to attribute seeded example articles. No verified golf/private-club RSS feed exists for this placeholder — left inactive with no RSS URL rather than a fake example.com address. Do not point this at a fabricated feed in production.";
+
 const sources = [
-  ["ClubFlow Intelligence Desk", "https://example.com/clubflow", null, "industry"],
-  ["Club Management Update", "https://example.com/cmu", "https://example.com/cmu/rss", "industry"],
-  ["Private Club Insider", "https://example.com/pci", "https://example.com/pci/rss", "industry"],
-  ["Golf Business Journal", "https://example.com/gbj", "https://example.com/gbj/rss", "mergers-acquisitions"],
-  ["Resort & Club Design", "https://example.com/rcd", "https://example.com/rcd/rss", "developments"],
-  ["Hospitality Tech Ledger", "https://example.com/htl", "https://example.com/htl/rss", "technology"]
+  { name: "ClubFlow Intelligence Desk", homepageUrl: "https://example.com/clubflow", rssUrl: null, primaryCategory: "industry", active: false, priority: 50, notes: PLACEHOLDER_NOTE },
+  { name: "Club Management Update", homepageUrl: "https://example.com/cmu", rssUrl: null, primaryCategory: "industry", active: false, priority: 50, notes: PLACEHOLDER_NOTE },
+  { name: "Private Club Insider", homepageUrl: "https://example.com/pci", rssUrl: null, primaryCategory: "industry", active: false, priority: 50, notes: PLACEHOLDER_NOTE },
+  { name: "Golf Business Journal", homepageUrl: "https://example.com/gbj", rssUrl: null, primaryCategory: "mergers-acquisitions", active: false, priority: 50, notes: PLACEHOLDER_NOTE },
+  { name: "Resort & Club Design", homepageUrl: "https://example.com/rcd", rssUrl: null, primaryCategory: "developments", active: false, priority: 50, notes: PLACEHOLDER_NOTE },
+  { name: "Hospitality Tech Ledger", homepageUrl: "https://example.com/htl", rssUrl: null, primaryCategory: "technology", active: false, priority: 50, notes: PLACEHOLDER_NOTE },
+  {
+    name: "Club + Resort Business",
+    homepageUrl: "https://clubandresortbusiness.com",
+    rssUrl: "https://clubandresortbusiness.com/feed/",
+    primaryCategory: "industry",
+    active: true,
+    priority: 75,
+    notes: "Verified live RSS feed. Covers private club, resort, and yacht/city club operations, capital projects, development, and leadership."
+  },
+  {
+    name: "Golf Inc.",
+    homepageUrl: "https://golfincmagazine.com",
+    rssUrl: "https://golfincmagazine.com/feed/",
+    primaryCategory: "industry",
+    active: true,
+    priority: 75,
+    notes: "Verified live RSS feed for golf course/club owners and managers. Covers ownership, management, renovation, and deal news."
+  },
+  {
+    name: "Golf Industry Central",
+    homepageUrl: "https://golfindustrycentral.com.au",
+    rssUrl: "https://golfindustrycentral.com.au/feed/?post_type=golf-industry-news",
+    primaryCategory: "industry",
+    active: true,
+    priority: 25,
+    notes: "Verified live RSS feed. Australasian golf industry trade news — secondary/regional priority relative to US-focused sources."
+  }
 ] as const;
 
 function slugify(value: string) { return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""); }
@@ -154,7 +184,10 @@ const people = [
 
 async function main() {
   const categoryRecords = await Promise.all(categories.map(([name, slug, description]) => prisma.category.upsert({ where: { slug }, update: { name, description }, create: { name, slug, description } })));
-  const sourceRecords = await Promise.all(sources.map(([name, homepageUrl, rssUrl, primaryCategory]) => prisma.source.upsert({ where: { name }, update: { homepageUrl, rssUrl, primaryCategory }, create: { name, homepageUrl, rssUrl, primaryCategory } })));
+  const sourceRecords = await Promise.all(sources.map(({ name, homepageUrl, rssUrl, primaryCategory, active, priority, notes }) => {
+    const data = { homepageUrl, rssUrl, primaryCategory, active, priority, notes };
+    return prisma.source.upsert({ where: { name }, update: data, create: { name, ...data } });
+  }));
   const categoryBySlug = Object.fromEntries(categoryRecords.map((record) => [record.slug, record]));
   const sourceByName = Object.fromEntries(sourceRecords.map((record) => [record.name, record]));
   const media = await Promise.all([
