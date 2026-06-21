@@ -52,16 +52,21 @@ async function articleCategoryCount(categorySlug: string) {
   return prisma.article.count({ where: { category: { slug: categorySlug } } });
 }
 
+const managedArticleCategorySlugs = adminSections
+  .filter((section) => section.kind === "article")
+  .map((section) => section.categorySlug);
+
+function sectionSlugForCategory(categorySlug: string) {
+  return adminSections.find((section) => section.kind === "article" && section.categorySlug === categorySlug)?.slug;
+}
+
 function sectionLabelForCategory(categorySlug: string) {
   return adminSections.find((section) => section.kind === "article" && section.categorySlug === categorySlug)?.label;
 }
 
-function sectionSlugForCategory(categorySlug: string) {
-  return adminSections.find((section) => section.kind === "article" && section.categorySlug === categorySlug)?.slug ?? "industry";
-}
-
 function editHrefForCategory(categorySlug: string, id: string) {
-  return `/admin/${sectionSlugForCategory(categorySlug)}/${id}/edit`;
+  const sectionSlug = sectionSlugForCategory(categorySlug);
+  return sectionSlug ? `/admin/${sectionSlug}/${id}/edit` : undefined;
 }
 
 export default async function AdminDashboard() {
@@ -107,7 +112,12 @@ export default async function AdminDashboard() {
     prisma.executiveMove.count({ where: { status: { not: "published" } } }),
     prisma.rankingEntry.count({ where: { status: { not: "published" } } }),
     prisma.podcastEpisode.count({ where: { status: { not: "published" } } }),
-    prisma.article.findMany({ orderBy: { updatedAt: "desc" }, take: 6, include: { category: true } }),
+    prisma.article.findMany({
+      where: { category: { slug: { in: managedArticleCategorySlugs } } },
+      orderBy: { updatedAt: "desc" },
+      take: 6,
+      include: { category: true }
+    }),
     prisma.jobPosting.findMany({ orderBy: { updatedAt: "desc" }, take: 4 }),
     prisma.executiveMove.findMany({ orderBy: { updatedAt: "desc" }, take: 4 }),
     prisma.article.findMany({
@@ -116,8 +126,18 @@ export default async function AdminDashboard() {
       take: 4,
       include: { category: true }
     }),
-    prisma.article.findMany({ where: { status: "draft" }, orderBy: { updatedAt: "desc" }, take: 6, include: { category: true } }),
-    prisma.article.findMany({ where: { status: "reviewed" }, orderBy: { updatedAt: "desc" }, take: 6, include: { category: true } })
+    prisma.article.findMany({
+      where: { status: "draft", category: { slug: { in: managedArticleCategorySlugs } } },
+      orderBy: { updatedAt: "desc" },
+      take: 6,
+      include: { category: true }
+    }),
+    prisma.article.findMany({
+      where: { status: "reviewed", category: { slug: { in: managedArticleCategorySlugs } } },
+      orderBy: { updatedAt: "desc" },
+      take: 6,
+      include: { category: true }
+    })
   ]);
 
   const deskTotal = deskCounts.reduce((sum, item) => sum + item.total, 0);
@@ -138,9 +158,9 @@ export default async function AdminDashboard() {
     { label: "Newsletter Subscribers", value: newsletterSubscribers, accent: "text-emerald-300" }
   ];
 
-  type ActivityRow = { id: string; title: string; section: string; status: ArticleStatus; date: Date; href: string };
+  type ActivityRow = { id: string; title: string; section: string; status: ArticleStatus; date: Date; href: string | undefined };
 
-  const activity: ActivityRow[] = [
+  const activity = [
     ...recentArticles.map((a) => ({
       id: a.id,
       title: a.title,
@@ -167,13 +187,16 @@ export default async function AdminDashboard() {
       href: `/admin/developments/${d.id}/edit`
     }))
   ]
+    .filter((row): row is ActivityRow & { href: string } => Boolean(row.href))
     .sort((a, b) => b.date.getTime() - a.date.getTime())
     .slice(0, 10);
 
   const needsAttention = [
     ...draftArticles.map((a) => ({ id: a.id, title: a.title, section: sectionLabelForCategory(a.category.slug) ?? a.category.name, status: a.status, href: editHrefForCategory(a.category.slug, a.id) })),
     ...reviewedArticles.map((a) => ({ id: a.id, title: a.title, section: sectionLabelForCategory(a.category.slug) ?? a.category.name, status: a.status, href: editHrefForCategory(a.category.slug, a.id) }))
-  ].slice(0, 8);
+  ]
+    .filter((row): row is { id: string; title: string; section: string; status: ArticleStatus; href: string } => Boolean(row.href))
+    .slice(0, 8);
 
   return (
     <main className="container-shell py-8">
