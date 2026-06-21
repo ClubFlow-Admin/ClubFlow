@@ -8,7 +8,7 @@ import { NewsletterForm } from "@/components/newsletter-form";
 import { getArticles, getPublishedArticleBySlug } from "@/lib/articles";
 import { publicHrefForCategory } from "@/lib/categories";
 import { imageForArticle } from "@/lib/images";
-import { formatLocation } from "@/lib/utils";
+import { formatLocation, isValidExternalSourceUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +30,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
   const location = formatLocation(article.city, article.state);
   const whatHappened = article.aiWhatHappened || article.originalExcerpt;
   const whyItMatters = article.aiWhyItMatters || DEFAULT_WHY_IT_MATTERS;
+  const hasRealSource = isValidExternalSourceUrl(article.originalUrl);
 
   return <main>
     <article>
@@ -82,7 +83,11 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
             {article.aiIndustryContext ? <section className="mt-10"><h2>Industry context</h2><Paragraphs text={article.aiIndustryContext} /></section> : null}
 
             <div className="mt-10 flex flex-wrap gap-2 border-t pt-8">{article.tags.map((tag) => <span key={tag} className="border bg-white px-2.5 py-1 text-xs font-bold text-muted-foreground">{tag}</span>)}</div>
-            <a href={article.originalUrl} target="_blank" rel="noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-sm bg-ink px-5 py-3 text-sm font-black text-white no-underline">View original source <ExternalLink className="h-4 w-4" /></a>
+            {hasRealSource ? (
+              <a href={article.originalUrl} target="_blank" rel="noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-sm bg-ink px-5 py-3 text-sm font-black text-white no-underline">View original source <ExternalLink className="h-4 w-4" /></a>
+            ) : (
+              <p className="mt-8 inline-flex items-center gap-2 rounded-sm border border-dashed px-5 py-3 text-sm font-bold text-muted-foreground">Demo article — no external source available.</p>
+            )}
           </div>
         </div>
 

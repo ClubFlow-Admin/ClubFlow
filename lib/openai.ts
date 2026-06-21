@@ -13,6 +13,10 @@ export function getOpenAIModel() {
   return process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 }
 
+export function isOpenAIConfigured() {
+  return Boolean(process.env.OPENAI_API_KEY);
+}
+
 export async function summarizeClubStory(input: {
   title: string;
   excerpt?: string;

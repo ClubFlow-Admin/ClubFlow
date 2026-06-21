@@ -8,6 +8,7 @@ import { AdminTabs } from "@/components/admin-tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { isOpenAIConfigured } from "@/lib/openai";
 import { prisma } from "@/lib/prisma";
 import { sourceCategories, sourceCategoryLabel, sourcePriorityLabel, sourceTypeLabel, sourceTypes } from "@/lib/source-options";
 
@@ -39,6 +40,9 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
       <div className="flex flex-wrap items-end justify-between gap-5"><div><div className="text-xs font-black uppercase tracking-[.16em] text-emerald-300">ClubFlow Intelligence Network</div><h1 className="font-serif mt-2 text-4xl font-black">Source Management Center</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-white/65">Track the golf and private-club sources that will power monitoring, RSS ingestion, and the future editorial review queue.</p></div><div className="flex flex-col items-end gap-3"><div className="flex gap-2"><Button asChild><Link href="/admin/sources/new" className="no-underline"><Plus className="h-4 w-4" /> Add Source</Link></Button></div><AdminIngestButton /></div></div>
       <div className="mt-6 grid grid-cols-3 gap-px bg-white/15"><Stat label="Total Sources" value={total} /><Stat label="Active" value={active} /><Stat label="Inactive" value={total-active} /></div>
       <p className="mt-4 flex items-start gap-2 rounded-md border border-amber-300/30 bg-amber-950/30 p-3 text-xs leading-5 text-amber-100"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />Never point a source at a fabricated or placeholder URL (e.g. example.com) in production. If a source has no verified RSS feed, leave the RSS field blank and deactivate it rather than faking one — ingestion only runs against active sources with a real feed URL.</p>
+      {isOpenAIConfigured() ? null : (
+        <p className="mt-3 flex items-start gap-2 rounded-md border border-amber-300/30 bg-amber-950/30 p-3 text-xs leading-5 text-amber-100"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />AI is not configured. Imported articles will remain short drafts using RSS excerpts.</p>
+      )}
     </section>
 
     <form action="/admin/sources" className="mb-5 grid gap-3 rounded-lg border bg-white p-4 md:grid-cols-[minmax(220px,1fr)_repeat(3,minmax(150px,auto))_auto]">

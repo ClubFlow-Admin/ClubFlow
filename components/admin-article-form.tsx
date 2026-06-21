@@ -1,5 +1,5 @@
 import type { ArticleStatus, Category, MediaAsset, Source } from "@prisma/client";
-import { Bot, CheckCircle2, Link2, PenLine } from "lucide-react";
+import { AlertTriangle, Bot, CheckCircle2, Link2, PenLine } from "lucide-react";
 import type * as React from "react";
 import type { ArticleWithRelations } from "@/lib/articles";
 import { AdminAiTextField } from "@/components/admin-ai-text-field";
@@ -65,7 +65,8 @@ export function AdminArticleForm({
   lockedCategory,
   mediaAssets = [],
   sources,
-  entityOptions
+  entityOptions,
+  openAiConfigured
 }: {
   action: (formData: FormData) => Promise<void>;
   article?: ArticleWithRelations;
@@ -74,11 +75,18 @@ export function AdminArticleForm({
   mediaAssets?: MediaAsset[];
   sources: Source[];
   entityOptions: { clubs: { id: string; name: string }[]; companies: { id: string; name: string }[]; people: { id: string; firstName: string; lastName: string }[] };
+  openAiConfigured: boolean;
 }) {
   const publishedAt = article?.publishedAt.toISOString().slice(0, 10) ?? new Date().toISOString().slice(0, 10);
 
   return (
     <form action={action} className="grid gap-6">
+      {openAiConfigured ? null : (
+        <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <span>AI is not configured. Imported articles will remain short drafts using RSS excerpts.</span>
+        </div>
+      )}
       {article ? <AiProcessingStatus article={article} /> : null}
 
       <EditorSection eyebrow="Article" title="Headline & Publishing Details" description="Locked metadata that controls where and when this briefing runs.">
