@@ -10,7 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "db:init:manual": "docker cp prisma/manual-init.sql clubflow-postgres:/tmp/clubflow-init.sql && docker exec clubflow-postgres psql -U clubflow -d clubflow -f /tmp/clubflow-init.sql",
+    "db:init:manual": "node scripts/run-manual-init.mjs",
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
