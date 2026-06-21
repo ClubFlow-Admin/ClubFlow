@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { ArrowUpRight, Newspaper } from "lucide-react";
 import { categoryNav } from "@/lib/categories";
 import "./globals.css";
@@ -201,14 +202,17 @@ const criticalStyles = `
   }
 `;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const requestHeaders = await headers();
+  const hideSiteChrome = requestHeaders.get("x-clubflow-hide-site-chrome") === "1";
+
   return (
     <html lang="en">
       <head>
         <style dangerouslySetInnerHTML={{ __html: criticalStyles }} />
       </head>
       <body>
-        <header className="site-header bg-white">
+        {!hideSiteChrome ? <header className="site-header bg-white">
           <div className="bg-ink text-white">
             <div className="container-shell flex min-h-8 items-center justify-between gap-4 text-[11px] font-bold uppercase tracking-[0.16em]">
               <span>Private club market intelligence</span>
@@ -234,14 +238,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               ))}
             </div>
           </nav>
-        </header>
+        </header> : null}
         {children}
-        <footer className="mt-12 border-t bg-ink text-white">
+        {!hideSiteChrome ? <footer className="mt-12 border-t bg-ink text-white">
           <div className="container-shell grid gap-8 py-10 md:grid-cols-2">
             <div><div className="font-serif text-2xl font-black">ClubFlow</div><p className="mt-3 max-w-xl text-sm leading-6 text-white/65">What is happening across the private club industry—and why it matters to operators, boards, partners, and investors.</p></div>
             <div className="flex flex-wrap items-start gap-x-5 gap-y-2 text-sm font-semibold md:justify-end">{categoryNav.map((item) => <Link key={item.href} href={item.href} className="text-white/75 no-underline hover:text-white">{item.label}</Link>)}</div>
           </div>
-        </footer>
+        </footer> : null}
       </body>
     </html>
   );
