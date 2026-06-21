@@ -33,6 +33,17 @@ export function isValidExternalSourceUrl(url?: string | null): boolean {
   return true;
 }
 
+/** Estimated reading time in minutes from combined briefing text, ~200 wpm, minimum 1. */
+export function estimateReadingMinutes(...sections: Array<string | null | undefined>): number {
+  const wordCount = sections
+    .filter(Boolean)
+    .join(" ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+  return Math.max(1, Math.round(wordCount / 200));
+}
+
 export function slugify(value: string) {
   return value
     .toLowerCase()

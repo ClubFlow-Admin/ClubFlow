@@ -54,6 +54,14 @@ a {
 .article-prose > section { @apply border-b pb-9; }
 .article-prose > section + section { @apply pt-1; }
 
+.premium-callout { @apply border border-primary/15 bg-gradient-to-br from-white to-primary/[.04] p-7 sm:p-9; border-radius: 4px; box-shadow: 0 16px 40px rgba(15, 23, 42, .06); }
+.premium-callout p { @apply mt-4 text-[19px] font-medium leading-[1.8] text-foreground; max-width: 42rem; }
+.premium-callout p:first-of-type { @apply mt-5; }
+.takeaway-panel { @apply border border-amber-200/80 bg-gradient-to-br from-amber-50/70 to-amber-50/20 p-7 sm:p-9; border-radius: 4px; }
+.impact-panel { @apply border bg-white p-7 sm:p-9; border-radius: 4px; }
+.entity-card { @apply border bg-white p-5 transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md; border-radius: 4px; }
+.editorial-h2 { @apply font-serif text-[1.7rem] font-black tracking-tight sm:text-3xl; }
+
 @media (max-width: 639px) {
   .section-rule { @apply items-start; }
   .section-rule > a { @apply mt-1 shrink-0; }
