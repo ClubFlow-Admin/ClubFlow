@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { CheckCircle2, Edit, ExternalLink, PauseCircle, PlayCircle, Plus, Rss, Search } from "lucide-react";
 import type { Prisma } from "@prisma/client";
 import { setSourceActive } from "@/app/admin/sources/actions";
+import { AdminIngestButton } from "@/components/admin-ingest-button";
 import { AdminTabs } from "@/components/admin-tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,7 @@ export default async function SourcesPage({ searchParams }: { searchParams: Prom
 
   return <main className="container-shell py-8"><AdminTabs />
     <section className="mb-6 border bg-ink p-7 text-white">
-      <div className="flex flex-wrap items-end justify-between gap-5"><div><div className="text-xs font-black uppercase tracking-[.16em] text-emerald-300">ClubFlow Intelligence Network</div><h1 className="font-serif mt-2 text-4xl font-black">Source Management Center</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-white/65">Track the golf and private-club sources that will power monitoring, RSS ingestion, and the future editorial review queue.</p></div><Button asChild><Link href="/admin/sources/new" className="no-underline"><Plus className="h-4 w-4" /> Add Source</Link></Button></div>
+      <div className="flex flex-wrap items-end justify-between gap-5"><div><div className="text-xs font-black uppercase tracking-[.16em] text-emerald-300">ClubFlow Intelligence Network</div><h1 className="font-serif mt-2 text-4xl font-black">Source Management Center</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-white/65">Track the golf and private-club sources that will power monitoring, RSS ingestion, and the future editorial review queue.</p></div><div className="flex flex-col items-end gap-3"><div className="flex gap-2"><Button asChild><Link href="/admin/sources/new" className="no-underline"><Plus className="h-4 w-4" /> Add Source</Link></Button></div><AdminIngestButton /></div></div>
       <div className="mt-6 grid grid-cols-3 gap-px bg-white/15"><Stat label="Total Sources" value={total} /><Stat label="Active" value={active} /><Stat label="Inactive" value={total-active} /></div>
     </section>
 

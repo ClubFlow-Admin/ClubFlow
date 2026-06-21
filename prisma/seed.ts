@@ -25,12 +25,12 @@ const categories = [
 ] as const;
 
 const sources = [
-  ["ClubFlow Intelligence Desk", "https://example.com/clubflow", null],
-  ["Club Management Update", "https://example.com/cmu", "https://example.com/cmu/rss"],
-  ["Private Club Insider", "https://example.com/pci", "https://example.com/pci/rss"],
-  ["Golf Business Journal", "https://example.com/gbj", "https://example.com/gbj/rss"],
-  ["Resort & Club Design", "https://example.com/rcd", "https://example.com/rcd/rss"],
-  ["Hospitality Tech Ledger", "https://example.com/htl", "https://example.com/htl/rss"]
+  ["ClubFlow Intelligence Desk", "https://example.com/clubflow", null, "industry"],
+  ["Club Management Update", "https://example.com/cmu", "https://example.com/cmu/rss", "industry"],
+  ["Private Club Insider", "https://example.com/pci", "https://example.com/pci/rss", "industry"],
+  ["Golf Business Journal", "https://example.com/gbj", "https://example.com/gbj/rss", "mergers-acquisitions"],
+  ["Resort & Club Design", "https://example.com/rcd", "https://example.com/rcd/rss", "developments"],
+  ["Hospitality Tech Ledger", "https://example.com/htl", "https://example.com/htl/rss", "technology"]
 ] as const;
 
 function slugify(value: string) { return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""); }
@@ -154,7 +154,7 @@ const people = [
 
 async function main() {
   const categoryRecords = await Promise.all(categories.map(([name, slug, description]) => prisma.category.upsert({ where: { slug }, update: { name, description }, create: { name, slug, description } })));
-  const sourceRecords = await Promise.all(sources.map(([name, homepageUrl, rssUrl]) => prisma.source.upsert({ where: { name }, update: { homepageUrl, rssUrl }, create: { name, homepageUrl, rssUrl } })));
+  const sourceRecords = await Promise.all(sources.map(([name, homepageUrl, rssUrl, primaryCategory]) => prisma.source.upsert({ where: { name }, update: { homepageUrl, rssUrl, primaryCategory }, create: { name, homepageUrl, rssUrl, primaryCategory } })));
   const categoryBySlug = Object.fromEntries(categoryRecords.map((record) => [record.slug, record]));
   const sourceByName = Object.fromEntries(sourceRecords.map((record) => [record.name, record]));
   const media = await Promise.all([
