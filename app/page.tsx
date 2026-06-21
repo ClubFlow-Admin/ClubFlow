@@ -19,10 +19,10 @@ const sections = [
 export default async function HomePage() {
   const [articles, jobs, moves, developments, rankings] = await Promise.all([
     getArticles({ status: "published" }),
-    prisma.jobPosting.findMany({ orderBy: { postedAt: "desc" } }),
-    prisma.executiveMove.findMany({ orderBy: { effectiveAt: "desc" } }),
+    prisma.jobPosting.findMany({ where: { status: "published" }, orderBy: { postedAt: "desc" } }),
+    prisma.executiveMove.findMany({ where: { status: "published" }, orderBy: { effectiveAt: "desc" } }),
     prisma.developmentProject.count(),
-    prisma.rankingEntry.findMany({ orderBy: [{ category: "asc" }, { rank: "asc" }], take: 5 })
+    prisma.rankingEntry.findMany({ where: { status: "published" }, orderBy: [{ category: "asc" }, { rank: "asc" }], take: 5 })
   ]);
   const topStory = articles[0];
   const byCategory = (slug: string) => articles.filter((article) => article.category.slug === slug).slice(0, 3);

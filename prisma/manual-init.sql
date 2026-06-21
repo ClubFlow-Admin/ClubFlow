@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS "JobPosting" (
   "postedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "expiresAt" TIMESTAMP(3),
   "description" TEXT,
+  "status" "ArticleStatus" NOT NULL DEFAULT 'draft',
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL
 );
@@ -122,7 +123,9 @@ CREATE TABLE IF NOT EXISTS "ExecutiveMove" (
   "city" TEXT,
   "state" TEXT,
   "effectiveAt" TIMESTAMP(3),
+  "publishedAt" TIMESTAMP(3),
   "notes" TEXT,
+  "status" "ArticleStatus" NOT NULL DEFAULT 'draft',
   "articleId" TEXT UNIQUE REFERENCES "Article"("id") ON DELETE SET NULL ON UPDATE CASCADE,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL
@@ -153,6 +156,8 @@ CREATE TABLE IF NOT EXISTS "RankingEntry" (
   "state" TEXT,
   "score" INTEGER,
   "rationale" TEXT NOT NULL,
+  "publishedAt" TIMESTAMP(3),
+  "status" "ArticleStatus" NOT NULL DEFAULT 'draft',
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL,
   CONSTRAINT "RankingEntry_category_clubName_key" UNIQUE ("category", "clubName")
@@ -167,6 +172,7 @@ CREATE TABLE IF NOT EXISTS "PodcastEpisode" (
   "publishedAt" TIMESTAMP(3),
   "audioUrl" TEXT,
   "comingSoon" BOOLEAN NOT NULL DEFAULT true,
+  "status" "ArticleStatus" NOT NULL DEFAULT 'draft',
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL
 );
@@ -180,3 +186,10 @@ CREATE INDEX IF NOT EXISTS "Article_city_state_idx" ON "Article"("city", "state"
 CREATE INDEX IF NOT EXISTS "MediaAsset_category_idx" ON "MediaAsset"("category");
 CREATE UNIQUE INDEX IF NOT EXISTS "JobPosting_title_clubName_key" ON "JobPosting"("title", "clubName");
 CREATE INDEX IF NOT EXISTS "RankingEntry_category_rank_idx" ON "RankingEntry"("category", "rank");
+
+ALTER TABLE "JobPosting" ADD COLUMN IF NOT EXISTS "status" "ArticleStatus" NOT NULL DEFAULT 'draft';
+ALTER TABLE "ExecutiveMove" ADD COLUMN IF NOT EXISTS "status" "ArticleStatus" NOT NULL DEFAULT 'draft';
+ALTER TABLE "ExecutiveMove" ADD COLUMN IF NOT EXISTS "publishedAt" TIMESTAMP(3);
+ALTER TABLE "RankingEntry" ADD COLUMN IF NOT EXISTS "status" "ArticleStatus" NOT NULL DEFAULT 'draft';
+ALTER TABLE "RankingEntry" ADD COLUMN IF NOT EXISTS "publishedAt" TIMESTAMP(3);
+ALTER TABLE "PodcastEpisode" ADD COLUMN IF NOT EXISTS "status" "ArticleStatus" NOT NULL DEFAULT 'draft';

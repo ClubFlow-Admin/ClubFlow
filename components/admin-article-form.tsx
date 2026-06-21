@@ -12,12 +12,14 @@ export function AdminArticleForm({
   action,
   article,
   categories,
+  lockedCategory,
   mediaAssets = [],
   sources
 }: {
   action: (formData: FormData) => Promise<void>;
   article?: ArticleWithRelations;
-  categories: Category[];
+  categories?: Category[];
+  lockedCategory?: Category;
   mediaAssets?: MediaAsset[];
   sources: Source[];
 }) {
@@ -45,7 +47,13 @@ export function AdminArticleForm({
             ))}
           </select>
         </div>
-        <div className="grid gap-2">
+        {lockedCategory ? (
+          <div className="grid gap-2">
+            <Label>Locked Section</Label>
+            <div className="flex h-10 items-center rounded-md border border-primary/30 bg-primary/10 px-3 text-sm font-black text-primary">{lockedCategory.name}</div>
+            <input type="hidden" name="categoryId" value={lockedCategory.id} />
+          </div>
+        ) : <div className="grid gap-2">
           <Label htmlFor="categoryId">Category</Label>
           <select
             id="categoryId"
@@ -55,13 +63,13 @@ export function AdminArticleForm({
             className="h-10 rounded-md border bg-background px-3 text-sm"
           >
             <option value="">Select category</option>
-            {categories.map((category) => (
+            {(categories ?? []).map((category) => (
               <option value={category.id} key={category.id}>
                 {category.name}
               </option>
             ))}
           </select>
-        </div>
+        </div>}
         <Field label="Author" name="author" defaultValue={article?.author ?? undefined} />
         <Field label="Published Date" name="publishedAt" defaultValue={publishedAt} type="date" required />
         <Field label="Club Name" name="clubName" defaultValue={article?.clubName ?? undefined} />

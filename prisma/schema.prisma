@@ -131,6 +131,7 @@ model JobPosting {
   postedAt    DateTime @default(now())
   expiresAt   DateTime?
   description String?
+  status      ArticleStatus @default(draft)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -146,7 +147,9 @@ model ExecutiveMove {
   city        String?
   state       String?
   effectiveAt DateTime?
+  publishedAt DateTime?
   notes       String?
+  status      ArticleStatus @default(draft)
   articleId   String?  @unique
   article     Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
@@ -179,6 +182,8 @@ model RankingEntry {
   state       String?
   score       Int?
   rationale   String
+  publishedAt DateTime?
+  status      ArticleStatus @default(draft)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -195,6 +200,7 @@ model PodcastEpisode {
   publishedAt DateTime?
   audioUrl    String?
   comingSoon  Boolean  @default(true)
+  status      ArticleStatus @default(draft)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

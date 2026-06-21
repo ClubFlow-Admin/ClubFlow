@@ -1,0 +1,102 @@
+"use server";
+
+import { ArticleStatus } from "@prisma/client";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { z } from "zod";
+import { getAdminSection } from "@/lib/admin-sections";
+import { prisma } from "@/lib/prisma";
+import { slugify } from "@/lib/utils";
+
+const optional = z.string().optional().transform((value) => value?.trim() || null);
+const status = z.nativeEnum(ArticleStatus);
+const articleSchema = z.object({
+  title: z.string().min(3), originalUrl: z.string().url(), sourceId: z.string().min(1), author: optional,
+  publishedAt: z.string().min(1), tags: z.string().optional(), clubName: optional, city: optional, state: optional,
+  originalExcerpt: optional, aiSummary: z.string().min(10), importanceScore: z.coerce.number().int().min(0).max(100),
+  status, heroImageId: optional
+});
+const jobSchema = z.object({ title: z.string().min(2), clubName: z.string().min(2), city: optional, state: optional, url: optional, postedAt: z.string().min(1), expiresAt: optional, description: optional, status });
+const moveSchema = z.object({ executive: z.string().min(2), newRole: z.string().min(2), previousRole: optional, clubName: z.string().min(2), city: optional, state: optional, effectiveAt: optional, publishedAt: z.string().min(1), notes: optional, status });
+const rankingSchema = z.object({ category: z.string().min(2), rank: z.coerce.number().int().positive(), clubName: z.string().min(2), city: optional, state: optional, score: z.preprocess((value) => value === "" ? null : value, z.coerce.number().int().min(0).max(100).nullable()), rationale: z.string().min(10), publishedAt: z.string().min(1), status });
+const podcastSchema = z.object({ showName: z.string().min(2), title: z.string().min(2), description: z.string().min(10), duration: optional, publishedAt: optional, audioUrl: optional, status });
+
+function sectionOrThrow(sectionSlug: string) {
+  const section = getAdminSection(sectionSlug);
+  if (!section) throw new Error("Unknown admin section.");
+  return section;
+}
+
+function dateOrNull(value: string | null) { return value ? new Date(value) : null; }
+function refresh(sectionSlug: string, publicHref: string) {
+  revalidatePath("/"); revalidatePath(publicHref); revalidatePath(`/admin/${sectionSlug}`); revalidatePath("/admin");
+}
+
+export async function createSectionContent(sectionSlug: string, formData: FormData) {
+  const section = sectionOrThrow(sectionSlug);
+  const raw = Object.fromEntries(formData.entries());
+  if (section.kind === "article") {
+    const parsed = articleSchema.parse(raw);
+    const category = await prisma.category.findUnique({ where: { slug: section.categorySlug } });
+    if (!category) throw new Error(`Missing locked category: ${section.categorySlug}`);
+    await prisma.article.create({ data: { ...parsed, slug: slugify(parsed.title), publishedAt: new Date(parsed.publishedAt), tags: parsed.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? [], categoryId: category.id } });
+  } else if (section.kind === "job") {
+    const parsed = jobSchema.parse(raw);
+    await prisma.jobPosting.create({ data: { ...parsed, postedAt: new Date(parsed.postedAt), expiresAt: dateOrNull(parsed.expiresAt) } });
+  } else if (section.kind === "executiveMove") {
+    const parsed = moveSchema.parse(raw);
+    await prisma.executiveMove.create({ data: { ...parsed, effectiveAt: dateOrNull(parsed.effectiveAt), publishedAt: new Date(parsed.publishedAt) } });
+  } else if (section.kind === "ranking") {
+    const parsed = rankingSchema.parse(raw); await prisma.rankingEntry.create({ data: { ...parsed, publishedAt: new Date(parsed.publishedAt) } });
+  } else {
+    const parsed = podcastSchema.parse(raw);
+    await prisma.podcastEpisode.create({ data: { ...parsed, publishedAt: dateOrNull(parsed.publishedAt), comingSoon: formData.get("comingSoon") === "true" } });
+  }
+  refresh(sectionSlug, section.publicHref);
+  redirect(`/admin/${sectionSlug}`);
+}
+
+export async function updateSectionContent(sectionSlug: string, id: string, formData: FormData) {
+  const section = sectionOrThrow(sectionSlug);
+  const raw = Object.fromEntries(formData.entries());
+  if (section.kind === "article") {
+    const parsed = articleSchema.parse(raw);
+    const category = await prisma.category.findUnique({ where: { slug: section.categorySlug } });
+    if (!category) throw new Error(`Missing locked category: ${section.categorySlug}`);
+    await prisma.article.update({ where: { id }, data: { ...parsed, slug: slugify(parsed.title), publishedAt: new Date(parsed.publishedAt), tags: parsed.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? [], categoryId: category.id } });
+  } else if (section.kind === "job") {
+    const parsed = jobSchema.parse(raw);
+    await prisma.jobPosting.update({ where: { id }, data: { ...parsed, postedAt: new Date(parsed.postedAt), expiresAt: dateOrNull(parsed.expiresAt) } });
+  } else if (section.kind === "executiveMove") {
+    const parsed = moveSchema.parse(raw);
+    await prisma.executiveMove.update({ where: { id }, data: { ...parsed, effectiveAt: dateOrNull(parsed.effectiveAt), publishedAt: new Date(parsed.publishedAt) } });
+  } else if (section.kind === "ranking") {
+    const parsed = rankingSchema.parse(raw); await prisma.rankingEntry.update({ where: { id }, data: { ...parsed, publishedAt: new Date(parsed.publishedAt) } });
+  } else {
+    const parsed = podcastSchema.parse(raw);
+    await prisma.podcastEpisode.update({ where: { id }, data: { ...parsed, publishedAt: dateOrNull(parsed.publishedAt), comingSoon: formData.get("comingSoon") === "true" } });
+  }
+  refresh(sectionSlug, section.publicHref);
+  redirect(`/admin/${sectionSlug}`);
+}
+
+export async function deleteSectionContent(sectionSlug: string, id: string) {
+  const section = sectionOrThrow(sectionSlug);
+  if (section.kind === "article") await prisma.article.delete({ where: { id } });
+  else if (section.kind === "job") await prisma.jobPosting.delete({ where: { id } });
+  else if (section.kind === "executiveMove") await prisma.executiveMove.delete({ where: { id } });
+  else if (section.kind === "ranking") await prisma.rankingEntry.delete({ where: { id } });
+  else await prisma.podcastEpisode.delete({ where: { id } });
+  refresh(sectionSlug, section.publicHref);
+}
+
+export async function setSectionContentStatus(sectionSlug: string, id: string, nextStatus: ArticleStatus) {
+  const section = sectionOrThrow(sectionSlug);
+  const parsedStatus = status.parse(nextStatus);
+  if (section.kind === "article") await prisma.article.update({ where: { id }, data: { status: parsedStatus } });
+  else if (section.kind === "job") await prisma.jobPosting.update({ where: { id }, data: { status: parsedStatus } });
+  else if (section.kind === "executiveMove") await prisma.executiveMove.update({ where: { id }, data: { status: parsedStatus } });
+  else if (section.kind === "ranking") await prisma.rankingEntry.update({ where: { id }, data: { status: parsedStatus } });
+  else await prisma.podcastEpisode.update({ where: { id }, data: { status: parsedStatus } });
+  refresh(sectionSlug, section.publicHref);
+}

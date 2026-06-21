@@ -1,22 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { Database, FileText, LayoutDashboard, LogOut, Radar } from "lucide-react";
+import { Database, LayoutDashboard, LogOut } from "lucide-react";
 import { signOutAdmin } from "@/app/admin/login/actions";
 import { Button } from "@/components/ui/button";
+import { adminSections } from "@/lib/admin-sections";
 
-const tabs = [
+const utilityTabs = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Articles", href: "/admin/articles/new", icon: FileText },
-  { label: "Intelligence", href: "/admin/intelligence", icon: Radar },
   { label: "Backend", href: "/admin/backend", icon: Database }
 ];
 
 export function AdminTabs() {
   return (
-    <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-white p-3">
+    <div className="mb-6 rounded-lg border bg-white p-3">
+      <div className="flex items-center justify-between gap-3 border-b pb-3">
       <nav className="flex flex-wrap gap-2">
-        {tabs.map((tab) => {
+        {utilityTabs.map((tab) => {
           const Icon = tab.icon;
           return (
             <Link
@@ -36,6 +36,14 @@ export function AdminTabs() {
           Sign out
         </Button>
       </form>
+      </div>
+      <nav className="mt-3 flex gap-1 overflow-x-auto pb-1">
+        {adminSections.map((section) => (
+          <Link key={section.slug} href={`/admin/${section.slug}`} className="whitespace-nowrap rounded-md px-3 py-2 text-xs font-bold no-underline hover:bg-muted hover:text-primary">
+            {section.label}
+          </Link>
+        ))}
+      </nav>
     </div>
   );
 }
