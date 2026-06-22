@@ -4,6 +4,7 @@ import { Clock } from "lucide-react";
 import type { ArticleWithRelations } from "@/lib/articles";
 import { importanceTier, type ImportanceTier } from "@/lib/importance";
 import { estimateReadingMinutes } from "@/lib/utils";
+import { whyItMattersFor } from "@/lib/why-it-matters";
 
 const TIER_STYLE: Record<ImportanceTier, string> = {
   Breaking: "bg-rose-600/10 text-rose-700",
@@ -47,6 +48,10 @@ export function DailyBrief({ articles }: { articles: ArticleWithRelations[] }) {
                     <h3 className="font-serif mt-1.5 text-lg font-black leading-snug transition hover:text-primary sm:text-xl">{article.title}</h3>
                   </Link>
                   <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{oneSentenceSummary(article)}</p>
+                  <div className="mt-2 border-l-2 border-primary/20 pl-3">
+                    <div className="text-[10px] font-black uppercase tracking-[.08em] text-primary/70">Why it matters</div>
+                    <p className="mt-0.5 text-xs leading-5 text-muted-foreground/90">{whyItMattersFor(article)}</p>
+                  </div>
                   <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold uppercase tracking-[.06em] text-muted-foreground">
                     <time dateTime={article.publishedAt.toISOString()}>{format(article.publishedAt, "MMM d, yyyy")}</time>
                     <span aria-hidden="true">·</span>
