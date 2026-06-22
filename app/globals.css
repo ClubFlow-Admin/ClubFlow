@@ -53,10 +53,12 @@ a {
 .article-prose p:first-of-type { @apply mt-3; }
 .article-prose > section.with-divider { @apply border-b pb-9; }
 .article-prose > section.with-divider + section { @apply pt-1; }
+.article-prose p.drop-cap:first-letter { @apply font-serif font-black text-primary; float: left; line-height: .8; padding-right: .5rem; padding-top: .35rem; font-size: 3.6rem; }
 
 .premium-callout { @apply border border-primary/15 bg-gradient-to-br from-white to-primary/[.04] p-7 sm:p-9; border-radius: 4px; box-shadow: 0 16px 40px rgba(15, 23, 42, .06); }
 .premium-callout p { @apply mt-4 text-[19px] font-medium leading-[1.8] text-foreground; max-width: 42rem; }
 .premium-callout p:first-of-type { @apply mt-5; }
+.executive-brief-callout { @apply border border-primary/15 bg-gradient-to-br from-white to-primary/[.04] p-7 sm:p-9; border-radius: 4px; box-shadow: 0 16px 40px rgba(15, 23, 42, .06); }
 .takeaway-panel { @apply border border-amber-200/80 bg-gradient-to-br from-amber-50/70 to-amber-50/20 p-7 sm:p-9; border-radius: 4px; }
 .impact-panel { @apply border bg-white p-7 sm:p-9; border-radius: 4px; }
 .entity-card { @apply border bg-white p-5 transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md; border-radius: 4px; }

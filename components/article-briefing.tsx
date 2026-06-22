@@ -1,17 +1,27 @@
 import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowLeft, ArrowRight, Building2, CheckCircle2, Clock, ExternalLink, Flag, MapPin, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, CheckCircle2, Clock, ExternalLink, Flag, Handshake, MapPin, PiggyBank, UserRoundPlus, Users, Wrench } from "lucide-react";
 import type { ReactNode } from "react";
 import { SectionArticleCard } from "@/components/article-card";
 import { NewsletterForm } from "@/components/newsletter-form";
 import type { ArticleWithRelations } from "@/lib/articles";
+import { businessImpactForArticle, businessImpactSummary } from "@/lib/business-impact";
 import { imageForArticle, resolveArticleImages } from "@/lib/images";
-import { impactAreasForTags } from "@/lib/impact";
 import { estimateReadingMinutes, formatLocation, isValidExternalSourceUrl } from "@/lib/utils";
 
 const DEFAULT_WHY_IT_MATTERS =
   "This development adds to the operating, investment, and leadership signals ClubFlow tracks across the private golf-club industry. Club leaders can use the brief to inform planning, benchmarking, and conversations with boards and partners.";
+
+const DESK_ICON: Record<string, typeof Building2> = {
+  "executive-moves": UserRoundPlus,
+  "developments-renovations": Building2,
+  technology: Wrench,
+  "capital-investments": PiggyBank,
+  "mergers-acquisitions": Handshake
+};
+
+type RelatedDesk = { slug: string; label: string; href: string; articles: ArticleWithRelations[] };
 
 function Paragraphs({ text, className }: { text: string; className?: string }) {
   const paragraphs = text.split(/\n+/).map((paragraph) => paragraph.trim()).filter(Boolean);
@@ -21,11 +31,13 @@ function Paragraphs({ text, className }: { text: string; className?: string }) {
 export function ArticleBriefing({
   article,
   related,
+  relatedDesks = [],
   sectionHref,
   banner
 }: {
   article: ArticleWithRelations;
   related: ArticleWithRelations[];
+  relatedDesks?: RelatedDesk[];
   sectionHref: string;
   banner?: ReactNode;
 }) {
@@ -35,22 +47,25 @@ export function ArticleBriefing({
   const hasRealSource = isValidExternalSourceUrl(article.originalUrl);
   const deck = article.dek || article.aiSummary.split(/(?<=[.!?])\s+/)[0];
   const keyTakeaways = article.aiKeyTakeaways.slice(0, 5);
-  const impactAreas = impactAreasForTags(article.tags);
+  const businessImpact = businessImpactForArticle(article.tags);
   const readingMinutes = estimateReadingMinutes(article.aiSummary, whatHappened, whyItMatters, article.aiIndustryContext);
+  const summaryParagraphs = article.aiSummary.split(/\n+/).map((p) => p.trim()).filter(Boolean);
   const whatHappenedParagraphs = whatHappened ? whatHappened.split(/\n+/).map((p) => p.trim()).filter(Boolean) : [];
   const pullQuote = keyTakeaways.length && whatHappenedParagraphs.length > 1 ? keyTakeaways[0] : null;
-  const hasEntities = Boolean(article.companies.length || article.clubs.length || article.people.length);
+  const primaryTopic = article.tags[0] ?? null;
+  const hasCompanies = article.companies.length > 0;
+  const hasClubs = article.clubs.length > 0;
+  const hasPeople = article.people.length > 0;
+  const hasRelatedIntelligence = relatedDesks.length > 0 || hasCompanies || hasClubs || hasPeople || related.length > 0;
   const heroImage = imageForArticle(article, 1440, 960);
   const relatedImages = resolveArticleImages(related, 900, 600);
 
   const tocItems = [
-    { id: "executive-summary", label: "Executive summary" },
-    keyTakeaways.length ? { id: "key-takeaways", label: "Key takeaways" } : null,
-    whatHappened ? { id: "what-happened", label: "What happened" } : null,
+    { id: "executive-brief", label: "Executive brief" },
+    { id: "main-story", label: "Main story" },
     article.aiIndustryContext ? { id: "industry-context", label: "Industry context" } : null,
-    impactAreas.length ? { id: "financial-impact", label: "Financial & operational impact" } : null,
-    { id: "why-it-matters", label: "Why it matters" },
-    hasEntities ? { id: "related-entities", label: "Related companies, clubs & executives" } : null
+    businessImpact.length ? { id: "business-impact", label: "Business impact" } : null,
+    hasRelatedIntelligence ? { id: "related-intelligence", label: "Related intelligence" } : null
   ].filter(Boolean) as { id: string; label: string }[];
 
   return <main className="bg-background">
@@ -71,22 +86,46 @@ export function ArticleBriefing({
               <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{readingMinutes} min read</span>
             </div>
           </div>
+          <div className="relative mx-auto mt-10 h-[280px] max-w-3xl overflow-hidden rounded-md border shadow-lg sm:h-[420px]"><Image src={heroImage.src} alt={heroImage.alt} fill priority unoptimized sizes="(min-width:1024px) 720px, 100vw" className="object-cover" /></div>
+          {heroImage.credit ? <p className="mx-auto mt-2 max-w-3xl text-right text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{heroImage.credit}</p> : null}
         </div>
       </header>
 
+      <section id="executive-brief" className="border-b bg-white">
+        <div className="container-shell py-10 sm:py-12">
+          <div className="mx-auto max-w-3xl">
+            <div className="kicker">Executive brief</div>
+            <div className="executive-brief-callout mt-4 grid gap-6 sm:grid-cols-3">
+              <div>
+                <div className="text-xs font-black uppercase tracking-[.08em] text-primary">Why this matters</div>
+                <p className="mt-2 text-sm leading-6 text-foreground/85">{whyItMatters.split(/\n+/)[0]}</p>
+              </div>
+              {keyTakeaways.length ? (
+                <div>
+                  <div className="text-xs font-black uppercase tracking-[.08em] text-primary">Key takeaway</div>
+                  <p className="mt-2 text-sm leading-6 text-foreground/85">{keyTakeaways[0]}</p>
+                </div>
+              ) : null}
+              <div>
+                <div className="text-xs font-black uppercase tracking-[.08em] text-primary">Business impact</div>
+                <p className="mt-2 text-sm leading-6 text-foreground/85">{businessImpactSummary(businessImpact)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div className="container-shell grid gap-12 py-12 sm:py-16 lg:grid-cols-[minmax(0,720px)_280px] lg:justify-center lg:gap-14">
         <div className="mx-auto w-full max-w-[720px]">
-          <div className="relative h-[280px] overflow-hidden rounded-md border shadow-lg sm:h-[460px]"><Image src={heroImage.src} alt={heroImage.alt} fill priority unoptimized sizes="(min-width:1024px) 720px, 100vw" className="object-cover" /></div>
-          {heroImage.credit ? <p className="mt-2 text-right text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{heroImage.credit}</p> : null}
-
-          <div className="article-prose mt-14">
-            <section id="executive-summary">
-              <div className="kicker">Executive summary</div>
-              <div className="premium-callout mt-4"><Paragraphs text={article.aiSummary} /></div>
+          <div id="main-story" className="article-prose">
+            <section>
+              {summaryParagraphs.map((paragraph, index) => (
+                <p key={index} className={index === 0 ? "drop-cap" : undefined}>{paragraph}</p>
+              ))}
             </section>
 
             {keyTakeaways.length ? (
-              <section id="key-takeaways" className="mt-12">
+              <section className="mt-12">
                 <div className="kicker">Key takeaways</div>
                 <div className="takeaway-panel mt-4">
                   <ul className="grid gap-3.5">
@@ -102,7 +141,7 @@ export function ArticleBriefing({
             ) : null}
 
             {whatHappenedParagraphs.length ? (
-              <section id="what-happened" className="mt-12 with-divider">
+              <section className="mt-12 with-divider">
                 <h2 className="editorial-h2">What happened</h2>
                 <p>{whatHappenedParagraphs[0]}</p>
                 {pullQuote ? <blockquote className="pull-quote my-8">&ldquo;{pullQuote}&rdquo;</blockquote> : null}
@@ -112,55 +151,26 @@ export function ArticleBriefing({
 
             {article.aiIndustryContext ? <section id="industry-context" className="mt-12 with-divider"><h2 className="editorial-h2">Industry context</h2><Paragraphs text={article.aiIndustryContext} /></section> : null}
 
-            {impactAreas.length ? (
-              <section id="financial-impact" className="mt-12">
-                <h2 className="editorial-h2">Financial &amp; operational impact</h2>
+            {businessImpact.length ? (
+              <section id="business-impact" className="mt-12">
+                <h2 className="editorial-h2">Business impact</h2>
                 <div className="impact-panel mt-4">
-                  <div className="flex flex-wrap gap-2.5">
-                    {impactAreas.map((area) => <span key={area.key} className="border border-primary/20 bg-primary/[.06] px-3 py-1.5 text-xs font-black uppercase tracking-[.06em] text-primary">{area.label}</span>)}
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {businessImpact.map((area) => (
+                      <div key={area.key}>
+                        <div className="text-xs font-black uppercase tracking-[.08em] text-primary">{area.label}</div>
+                        <p className="mt-1.5 text-sm leading-6 text-foreground/80">{area.tags.join(", ")}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </section>
             ) : null}
 
-            <section id="why-it-matters" className="mt-12 with-divider"><h2 className="editorial-h2">Why it matters</h2><Paragraphs text={whyItMatters} /></section>
-
-            {hasEntities ? (
-              <section id="related-entities" className="mt-12">
-                {article.companies.length ? (
-                  <div className="mb-8">
-                    <h2 className="editorial-h2">Related companies</h2>
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      {article.companies.map((company) => <div key={company.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Building2 className="h-4 w-4 text-primary" />{company.name}</div></div>)}
-                    </div>
-                  </div>
-                ) : null}
-
-                {article.clubs.length ? (
-                  <div className="mb-8">
-                    <h2 className="editorial-h2">Related clubs</h2>
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      {article.clubs.map((club) => <div key={club.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Flag className="h-4 w-4 text-primary" />{club.name}</div></div>)}
-                    </div>
-                  </div>
-                ) : null}
-
-                {article.people.length ? (
-                  <div>
-                    <h2 className="editorial-h2">Related executives</h2>
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      {article.people.map((person) => <div key={person.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Users className="h-4 w-4 text-primary" />{person.firstName} {person.lastName}</div></div>)}
-                    </div>
-                  </div>
-                ) : null}
-              </section>
-            ) : null}
-
-            <div className="mt-12 flex flex-wrap gap-2 border-t pt-8">{article.tags.map((tag) => <span key={tag} className="border bg-white px-2.5 py-1 text-xs font-bold text-muted-foreground">{tag}</span>)}</div>
             {hasRealSource ? (
-              <a href={article.originalUrl} target="_blank" rel="noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-sm bg-ink px-5 py-3 text-sm font-black text-white no-underline">View original source <ExternalLink className="h-4 w-4" /></a>
+              <a href={article.originalUrl} target="_blank" rel="noreferrer" className="mt-12 inline-flex items-center gap-2 rounded-sm bg-ink px-5 py-3 text-sm font-black text-white no-underline">View original source <ExternalLink className="h-4 w-4" /></a>
             ) : (
-              <p className="mt-8 inline-flex items-center gap-2 rounded-sm border border-dashed px-5 py-3 text-sm font-bold text-muted-foreground">Demo article — no external source available.</p>
+              <p className="mt-12 inline-flex items-center gap-2 rounded-sm border border-dashed px-5 py-3 text-sm font-bold text-muted-foreground">Demo article — no external source available.</p>
             )}
           </div>
         </div>
@@ -176,37 +186,89 @@ export function ArticleBriefing({
           ) : null}
 
           <div className="border-t-4 border-primary bg-white p-5">
-            <div className="kicker">Briefing data</div>
+            <div className="kicker">Key facts</div>
             <dl className="mt-4 divide-y text-sm">
-              <Meta label="Desk" value={article.category.name} />
-              <Meta label="Source" value={article.source.name} />
-              <Meta label="Published" value={format(article.publishedAt, "MMM d, yyyy")} />
-              <Meta label="Read time" value={`${readingMinutes} min`} />
-              <Meta label="Relevance score" value={`${article.importanceScore}/100`} />
+              <Meta label="Category" value={article.category.name} />
+              {hasCompanies ? <Meta label="Companies" value={article.companies.map((c) => c.name).join(", ")} /> : null}
+              {article.clubName ? <Meta label="Club" value={article.clubName} /> : hasClubs ? <Meta label="Club" value={article.clubs.map((c) => c.name).join(", ")} /> : null}
               {location ? <Meta label="Location" value={location} /> : null}
+              {primaryTopic ? <Meta label="Topic" value={primaryTopic} /> : null}
+              {article.tags.length ? <Meta label="Tags" value={article.tags.join(", ")} /> : null}
+              <Meta label="Reading time" value={`${readingMinutes} min`} />
+              <Meta label="Published" value={format(article.publishedAt, "MMM d, yyyy")} />
             </dl>
             <div className="mt-5 border-t pt-5"><div className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">ClubFlow standard</div><p className="mt-2 text-xs leading-5 text-muted-foreground">Concise, decision-ready reporting focused exclusively on golf clubs, resorts, operators, and industry partners.</p></div>
           </div>
-
-          {related.length ? (
-            <div className="border bg-white p-5">
-              <div className="kicker">Up next on this desk</div>
-              <div className="mt-3 divide-y">
-                {related.map((item) => (
-                  <Link key={item.id} href={`/articles/${item.slug}`} className="block py-3 no-underline first:pt-3 last:pb-0">
-                    <h3 className="font-serif text-sm font-black leading-snug text-foreground transition hover:text-primary">{item.title}</h3>
-                    <span className="mt-1 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{item.source.name}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ) : null}
         </aside>
       </div>
     </article>
 
-    {related.length ? <section className="border-y bg-white"><div className="container-shell py-12"><div className="section-rule"><div><div className="kicker">Continue the briefing</div><h2 className="font-serif mt-1 text-3xl font-black">Related stories</h2></div><Link href={sectionHref} className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-primary no-underline">Back to desk <ArrowRight className="h-3.5 w-3.5" /></Link></div><div className="mt-6 grid gap-4 md:grid-cols-3">{relatedImages.map(({ article: item, ...image }) => <SectionArticleCard key={item.id} article={item} image={image} />)}</div></div></section> : null}
-    <section className="container-shell py-12"><div className="grid gap-6 bg-primary p-6 text-white sm:p-8 lg:grid-cols-[1fr_420px] lg:items-center"><div><div className="text-xs font-black uppercase tracking-[.15em] text-emerald-200">The ClubFlow briefing</div><h2 className="font-serif mt-2 text-3xl font-black">Get the private club industry brief in your inbox.</h2><p className="mt-2 text-sm leading-6 text-white/70">The week&apos;s leadership moves, capital projects, developments, jobs, and operating intelligence.</p></div><NewsletterForm /></div></section>
+    {hasRelatedIntelligence ? (
+      <section id="related-intelligence" className="border-y bg-muted/25">
+        <div className="container-shell py-12 sm:py-16">
+          <div className="section-rule"><div><div className="kicker">Related intelligence</div><h2 className="font-serif mt-1 text-3xl font-black">Continue the briefing.</h2></div><Link href={sectionHref} className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-primary no-underline">Back to desk <ArrowRight className="h-3.5 w-3.5" /></Link></div>
+
+          {relatedDesks.length ? (
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {relatedDesks.map((desk) => {
+                const Icon = DESK_ICON[desk.slug] ?? Building2;
+                return (
+                  <div key={desk.slug} className="border bg-white p-5">
+                    <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.1em] text-primary"><Icon className="h-4 w-4" />{desk.label}</div>
+                    <div className="mt-3 divide-y">
+                      {desk.articles.map((item) => (
+                        <Link key={item.id} href={`/articles/${item.slug}`} className="block py-2.5 no-underline first:pt-0 last:pb-0">
+                          <h3 className="font-serif text-sm font-black leading-snug text-foreground transition hover:text-primary">{item.title}</h3>
+                        </Link>
+                      ))}
+                    </div>
+                    <Link href={desk.href} className="mt-3 inline-flex items-center gap-2 border-t pt-3 text-xs font-black uppercase tracking-[.06em] text-primary no-underline">View desk <ArrowRight className="h-3.5 w-3.5" /></Link>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+
+          {hasCompanies || hasClubs || hasPeople ? (
+            <div className="mt-8 grid gap-6 sm:grid-cols-3">
+              {hasCompanies ? (
+                <div>
+                  <div className="kicker">Related companies</div>
+                  <div className="mt-3 grid gap-3">
+                    {article.companies.map((company) => <div key={company.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Building2 className="h-4 w-4 text-primary" />{company.name}</div></div>)}
+                  </div>
+                </div>
+              ) : null}
+              {hasClubs ? (
+                <div>
+                  <div className="kicker">Related clubs</div>
+                  <div className="mt-3 grid gap-3">
+                    {article.clubs.map((club) => <div key={club.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Flag className="h-4 w-4 text-primary" />{club.name}</div></div>)}
+                  </div>
+                </div>
+              ) : null}
+              {hasPeople ? (
+                <div>
+                  <div className="kicker">Related executives</div>
+                  <div className="mt-3 grid gap-3">
+                    {article.people.map((person) => <div key={person.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Users className="h-4 w-4 text-primary" />{person.firstName} {person.lastName}</div></div>)}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {related.length ? (
+            <div className="mt-8">
+              <div className="kicker">Related articles</div>
+              <div className="mt-4 grid gap-4 md:grid-cols-3">{relatedImages.map(({ article: item, ...image }) => <SectionArticleCard key={item.id} article={item} image={image} />)}</div>
+            </div>
+          ) : null}
+        </div>
+      </section>
+    ) : null}
+
+    <section className="container-shell py-12"><div className="grid gap-6 bg-primary p-6 text-white sm:p-8 lg:grid-cols-[1fr_420px] lg:items-center"><div><div className="text-xs font-black uppercase tracking-[.15em] text-emerald-200">The ClubFlow briefing</div><h2 className="font-serif mt-2 text-3xl font-black">Subscribe to the ClubFlow Briefing.</h2><p className="mt-2 text-sm leading-6 text-white/70">The week&apos;s leadership moves, capital projects, developments, jobs, and operating intelligence.</p><Link href={sectionHref} className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.08em] text-emerald-200 no-underline">Explore related intelligence <ArrowRight className="h-3.5 w-3.5" /></Link></div><NewsletterForm /></div></section>
   </main>;
 }
 
