@@ -1,38 +1,35 @@
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowRight, BarChart3, BriefcaseBusiness, Check, Flame, Newspaper, Trophy, UserRoundPlus } from "lucide-react";
-import { CompactArticleRow, FeaturedArticleCard, SectionArticleCard } from "@/components/article-card";
+import { ArrowRight, BarChart3, BriefcaseBusiness, Building2, Check, Compass, Flame, Handshake, Headphones, Newspaper, PiggyBank, Trophy, UserRoundPlus, Wrench } from "lucide-react";
+import { CompactArticleRow, FeaturedArticleCard } from "@/components/article-card";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { getArticles } from "@/lib/articles";
-import { resolveArticleImages } from "@/lib/images";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [articles, jobs, moves, developmentProjects, rankings] = await Promise.all([
+  const [articles, jobs, moves, developmentProjects, rankings, podcasts] = await Promise.all([
     getArticles({ status: "published" }),
-    prisma.jobPosting.findMany({ where: { status: "published" }, orderBy: { postedAt: "desc" }, take: 6 }),
-    prisma.executiveMove.findMany({ where: { status: "published" }, orderBy: [{ effectiveAt: "desc" }, { updatedAt: "desc" }], take: 6 }),
+    prisma.jobPosting.findMany({ where: { status: "published" }, orderBy: { postedAt: "desc" }, take: 3 }),
+    prisma.executiveMove.findMany({ where: { status: "published" }, orderBy: [{ effectiveAt: "desc" }, { updatedAt: "desc" }], take: 3 }),
     prisma.developmentProject.count(),
-    prisma.rankingEntry.findMany({ where: { status: "published" }, orderBy: [{ category: "asc" }, { rank: "asc" }], take: 5 })
+    prisma.rankingEntry.findMany({ where: { status: "published" }, orderBy: [{ category: "asc" }, { rank: "asc" }], take: 3 }),
+    prisma.podcastEpisode.findMany({ where: { status: "published" }, orderBy: { createdAt: "asc" }, take: 3 })
   ]);
   const topStory = articles[0];
-  const briefing = articles.slice(0, 5);
-  const secondary = articles.slice(1, 3);
-  const headlines = articles.slice(3, 7);
+  const briefing = articles.slice(0, 4);
   const ticker = articles.slice(0, 8);
   const trending = [...articles].sort((a, b) => b.importanceScore - a.importanceScore).filter((article) => article.id !== topStory?.id).slice(0, 5);
-  const byCategory = (slug: string, count = 4) => articles.filter((article) => article.category.slug === slug).slice(0, count);
-  const developments = byCategory("developments-renovations");
-  const capital = byCategory("capital-investments");
-  const technology = byCategory("technology", 3);
-  const deals = byCategory("mergers-acquisitions");
+  const byCategory = (slug: string, count = 3) => articles.filter((article) => article.category.slug === slug).slice(0, count);
+  const industryPreview = byCategory("industry-news");
+  const developmentsPreview = byCategory("developments-renovations");
+  const technologyPreview = byCategory("technology");
+  const dealsPreview = byCategory("mergers-acquisitions");
+  const capitalPreview = byCategory("capital-investments");
   const featuredExecutiveStory = byCategory("executive-moves", 1)[0];
-  const featuredDevelopmentStory = developments[0];
-  const featuredCapitalStory = capital[0];
-  const secondaryImages = resolveArticleImages(secondary, 900, 600);
-  const technologyCardImages = resolveArticleImages(technology.slice(0, 2), 900, 600);
+  const featuredDevelopmentStory = developmentsPreview[0];
+  const featuredCapitalStory = capitalPreview[0];
 
   return <main>
     <section className="relative overflow-hidden bg-ink text-white">
@@ -57,39 +54,59 @@ export default async function HomePage() {
       ) : null}
     </section>
 
-    <section id="todays-brief" className="border-b bg-white"><div className="container-shell grid lg:grid-cols-[230px_1fr]"><div className="border-b py-6 lg:border-b-0 lg:border-r lg:pr-6"><div className="kicker">Today&apos;s ClubFlow Brief</div><h2 className="font-serif mt-2 text-2xl font-black">The morning read for club decision-makers.</h2><p className="mt-3 text-xs leading-5 text-muted-foreground">Top signals, ranked by relevance to operators, boards, partners, and investors.</p></div><div className="grid gap-x-6 py-2 sm:grid-cols-2 lg:px-6 xl:grid-cols-3">{briefing.map((article)=><CompactArticleRow key={article.id} article={article} />)}</div></div></section>
+    <section id="todays-brief" className="border-b bg-white"><div className="container-shell grid gap-6 py-8 lg:grid-cols-[230px_1fr] lg:gap-0"><div className="border-b pb-6 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-6"><div className="kicker">Today&apos;s ClubFlow Brief</div><h2 className="font-serif mt-2 text-2xl font-black">The morning read for club decision-makers.</h2><p className="mt-3 text-xs leading-5 text-muted-foreground">Top signals, ranked by relevance to operators, boards, partners, and investors.</p></div><div className="grid gap-x-6 lg:px-6 sm:grid-cols-2">{briefing.map((article)=><CompactArticleRow key={article.id} article={article} />)}</div></div></section>
 
-    <section className="container-shell py-10 sm:py-12">
+    {topStory ? <section className="container-shell py-12 sm:py-16">
       <SectionHeading eyebrow="Lead intelligence" title="What club leaders need to know now" href="/industry" />
-      {topStory ? <div className="mt-6"><FeaturedArticleCard article={topStory} priority /></div> : null}
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_1fr_.9fr]">{secondaryImages.map(({ article, ...image })=><SectionArticleCard key={article.id} article={article} image={image} />)}<div className="border bg-muted/35 px-5"><div className="border-b py-4 text-xs font-black uppercase tracking-[.14em] text-primary">Also on the wire</div>{headlines.map((article)=><CompactArticleRow key={article.id} article={article} />)}</div></div>
-    </section>
+      <div className="mt-7"><FeaturedArticleCard article={topStory} priority /></div>
+    </section> : null}
 
-    {trending.length ? <section className="border-y bg-white"><div className="container-shell py-10 sm:py-12"><div className="section-rule"><div><div className="kicker">Trending now</div><h2 className="font-serif mt-1 text-3xl font-black">Most relevant to club leaders this week</h2></div></div><div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">{trending.map((article,index)=><div key={article.id} className="card-lift relative border bg-white p-4"><span className="number-tabular absolute -top-3 left-4 flex h-7 w-7 items-center justify-center rounded-full bg-ink text-sm font-black text-white">{index+1}</span><Link href={`/articles/${article.slug}`} className="no-underline"><div className="mt-3 text-[10px] font-black uppercase tracking-[.1em] text-primary">{article.category.name}</div><h3 className="font-serif mt-2 text-base font-black leading-snug">{article.title}</h3></Link></div>)}</div></div></section> : null}
+    {trending.length ? <section className="border-y bg-white"><div className="container-shell py-12 sm:py-16"><div className="section-rule"><div><div className="kicker">Trending now</div><h2 className="font-serif mt-1 text-3xl font-black">Most relevant to club leaders this week</h2></div></div><div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">{trending.map((article,index)=><div key={article.id} className="card-lift relative border bg-white p-4"><span className="number-tabular absolute -top-3 left-4 flex h-7 w-7 items-center justify-center rounded-full bg-ink text-sm font-black text-white">{index+1}</span><Link href={`/articles/${article.slug}`} className="no-underline"><div className="mt-3 text-[10px] font-black uppercase tracking-[.1em] text-primary">{article.category.name}</div><h3 className="font-serif mt-2 text-base font-black leading-snug">{article.title}</h3></Link></div>)}</div></div></section> : null}
 
-    <section className="container-shell py-10 sm:py-12">
+    <section className="container-shell py-12 sm:py-16">
       <div className="section-rule"><div><div className="kicker">Spotlight desks</div><h2 className="font-serif mt-1 text-3xl font-black">Featured across the newsroom</h2></div></div>
-      <div className="mt-6 grid gap-5 lg:grid-cols-3">
+      <div className="mt-7 grid gap-5 lg:grid-cols-3">
         {featuredExecutiveStory ? <SpotlightCard icon={UserRoundPlus} eyebrow="Featured executive" article={featuredExecutiveStory} /> : null}
-        {featuredDevelopmentStory ? <SpotlightCard icon={BarChart3} eyebrow="Featured development" article={featuredDevelopmentStory} /> : null}
-        {featuredCapitalStory ? <SpotlightCard icon={Trophy} eyebrow="Featured capital investment" article={featuredCapitalStory} /> : null}
+        {featuredDevelopmentStory ? <SpotlightCard icon={Building2} eyebrow="Featured development" article={featuredDevelopmentStory} /> : null}
+        {featuredCapitalStory ? <SpotlightCard icon={PiggyBank} eyebrow="Featured capital investment" article={featuredCapitalStory} /> : null}
       </div>
     </section>
 
-    <section className="border-y bg-white"><div className="container-shell py-10 sm:py-12"><SectionHeading eyebrow="Development intelligence" title="Club Development Tracker" href="/developments" />{developments.length?<div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_.8fr]"><SectionArticleCard article={developments[0]} /><div className="border-y">{developments.slice(1).map((article)=><CompactArticleRow key={article.id} article={article} />)}</div></div>:null}</div></section>
-
-    <section className="container-shell grid gap-10 py-10 sm:py-12 lg:grid-cols-2">
-      <div><SectionHeading eyebrow="Capital monitor" title="Investment & Capital Projects" href="/capital-investments" /> <div className="mt-5 border-t">{capital.map((article)=><CompactArticleRow key={article.id} article={article} />)}</div></div>
-      <div><SectionHeading eyebrow="Systems & data" title="Technology Watch" href="/technology" /><div className="mt-5 grid gap-4 sm:grid-cols-2">{technologyCardImages.map(({ article, ...image })=><SectionArticleCard key={article.id} article={article} image={image} />)}</div>{technology[2]?<div className="mt-1"><CompactArticleRow article={technology[2]} /></div>:null}</div>
-    </section>
-
-    <section className="bg-ink text-white"><div className="container-shell grid gap-8 py-10 sm:py-12 lg:grid-cols-[.75fr_1.25fr]"><div><div className="text-xs font-black uppercase tracking-[.16em] text-emerald-300">Transaction intelligence</div><h2 className="font-serif mt-2 text-3xl font-black">Golf & Club Deal Desk</h2><p className="mt-3 text-sm leading-6 text-white/55">Ownership changes, portfolio activity, management agreements, and capital entering the private-club market.</p><MoreLink href="/mergers-acquisitions" label="Open the deal desk" inverse /></div><div className="grid gap-x-7 sm:grid-cols-2">{deals.map((article)=><CompactArticleRow key={article.id} article={article} inverse />)}</div></div></section>
-
-    <section className="container-shell grid gap-8 py-10 sm:py-12 xl:grid-cols-[1fr_1fr_.8fr]">
-      <IntelligencePanel icon={UserRoundPlus} eyebrow="Leadership moves" title="Who is moving where" href="/executive-moves">{moves.slice(0,5).map((move)=><div key={move.id} className="grid grid-cols-[1fr_auto] gap-3 border-b py-3 last:border-0"><div><div className="font-serif text-lg font-black">{move.executive}</div><div className="mt-1 text-xs font-bold text-primary">{move.newRole} · {move.clubName}</div></div><time className="text-[10px] font-bold uppercase text-muted-foreground">{move.effectiveAt?format(move.effectiveAt,"MMM d"):"New"}</time></div>)}</IntelligencePanel>
-      <IntelligencePanel icon={BriefcaseBusiness} eyebrow="Talent market" title="Club Leadership Jobs" href="/jobs">{jobs.slice(0,5).map((job)=><div key={job.id} className="border-b py-3 last:border-0"><div className="font-serif text-lg font-black">{job.title}</div><div className="mt-1 text-xs font-bold text-primary">{job.clubName} · {[job.city,job.state].filter(Boolean).join(", ")}</div></div>)}</IntelligencePanel>
-      <IntelligencePanel icon={Trophy} eyebrow="Rankings & watchlists" title="Clubs on the radar" href="/club-rankings">{rankings.map((entry)=><div key={entry.id} className="flex gap-3 border-b py-3 last:border-0"><span className="number-tabular w-7 text-xl font-black text-primary">{entry.rank}</span><div><div className="font-black">{entry.clubName}</div><div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{entry.category}</div></div></div>)}</IntelligencePanel>
-    </section>
+    <section className="border-t bg-muted/25"><div className="container-shell py-12 sm:py-16">
+      <div className="section-rule"><div><div className="kicker">Every desk, at a glance</div><h2 className="font-serif mt-1 text-3xl font-black">Browse ClubFlow by section.</h2></div></div>
+      <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <SectionPreviewPanel icon={Newspaper} eyebrow="Market watch" title="Industry" href="/industry">
+          {industryPreview.length ? industryPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} />) : <EmptyPreview />}
+        </SectionPreviewPanel>
+        <SectionPreviewPanel icon={Building2} eyebrow="Capital projects" title="Developments" href="/developments">
+          {developmentsPreview.length ? developmentsPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} />) : <EmptyPreview />}
+        </SectionPreviewPanel>
+        <SectionPreviewPanel icon={UserRoundPlus} eyebrow="Leadership" title="Executive Moves" href="/executive-moves">
+          {moves.length ? moves.map((move)=><div key={move.id} className="grid grid-cols-[1fr_auto] gap-3 border-b py-3 last:border-0"><div><div className="font-serif text-base font-black leading-snug">{move.executive}</div><div className="mt-1 text-xs font-bold text-primary">{move.newRole} · {move.clubName}</div></div><time className="text-[10px] font-bold uppercase text-muted-foreground">{move.effectiveAt?format(move.effectiveAt,"MMM d"):"New"}</time></div>) : <EmptyPreview />}
+        </SectionPreviewPanel>
+        <SectionPreviewPanel icon={BriefcaseBusiness} eyebrow="Talent market" title="Jobs" href="/jobs">
+          {jobs.length ? jobs.map((job)=><div key={job.id} className="border-b py-3 last:border-0"><div className="font-serif text-base font-black leading-snug">{job.title}</div><div className="mt-1 text-xs font-bold text-primary">{job.clubName} · {[job.city,job.state].filter(Boolean).join(", ")}</div></div>) : <EmptyPreview />}
+        </SectionPreviewPanel>
+        <SectionPreviewPanel icon={Wrench} eyebrow="Systems & data" title="Technology" href="/technology">
+          {technologyPreview.length ? technologyPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} />) : <EmptyPreview />}
+        </SectionPreviewPanel>
+        <SectionPreviewPanel icon={Handshake} eyebrow="Deal desk" title="Mergers & Acquisitions" href="/mergers-acquisitions">
+          {dealsPreview.length ? dealsPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} />) : <EmptyPreview />}
+        </SectionPreviewPanel>
+        <SectionPreviewPanel icon={PiggyBank} eyebrow="Capital monitor" title="Capital Investments" href="/capital-investments">
+          {capitalPreview.length ? capitalPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} />) : <EmptyPreview />}
+        </SectionPreviewPanel>
+        <SectionPreviewPanel icon={Trophy} eyebrow="Rankings & watchlists" title="Club Rankings" href="/club-rankings">
+          {rankings.length ? rankings.map((entry)=><div key={entry.id} className="flex gap-3 border-b py-3 last:border-0"><span className="number-tabular w-6 text-lg font-black text-primary">{entry.rank}</span><div><div className="font-black leading-snug">{entry.clubName}</div><div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{entry.category}</div></div></div>) : <EmptyPreview />}
+        </SectionPreviewPanel>
+        <SectionPreviewPanel icon={Headphones} eyebrow="Audio briefings" title="Podcasts" href="/podcasts">
+          {podcasts.length ? podcasts.map((episode)=><div key={episode.id} className="border-b py-3 last:border-0"><div className="font-serif text-base font-black leading-snug">{episode.title}</div><div className="mt-1 text-xs font-bold text-primary">{episode.showName}{episode.comingSoon?" · Coming soon":""}</div></div>) : <EmptyPreview />}
+        </SectionPreviewPanel>
+        <SectionPreviewPanel icon={Compass} eyebrow="Consulting partner" title="ClubOpsPro" href="/clubopspro" ctaLabel="Explore ClubOpsPro">
+          <p className="py-3 text-sm leading-6 text-muted-foreground">Consulting, playbooks, SOPs, and implementation support that turns ClubFlow&apos;s signal into action inside your operation.</p>
+        </SectionPreviewPanel>
+      </div>
+    </div></section>
 
     <section className="border-y bg-white"><div className="container-shell grid gap-8 py-10 sm:py-12 lg:grid-cols-[.85fr_1.15fr]"><div><div className="kicker">Why ClubFlow</div><h2 className="font-serif mt-3 text-balance text-3xl font-black sm:text-4xl">The business of golf clubs, in one intelligence layer.</h2></div><div><p className="text-lg leading-8 text-muted-foreground">ClubFlow tracks the business of golf clubs in one place — leadership changes, new developments, capital projects, technology adoption, rankings, and operating intelligence.</p><div className="mt-6 grid gap-3 sm:grid-cols-2">{["Private-club market signals","Leadership and talent movement","Capital and development activity","Technology and operating intelligence"].map((item)=><div key={item} className="flex items-center gap-3 text-sm font-black"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary"><Check className="h-3.5 w-3.5" /></span>{item}</div>)}</div></div></div></section>
 
@@ -100,7 +117,14 @@ export default async function HomePage() {
 function Pulse({value,label}:{value:number;label:string}) { return <div className="bg-ink p-4"><div className="number-tabular text-2xl font-black text-white">{value}</div><div className="mt-1 text-[10px] font-bold uppercase tracking-[.1em] text-white/45">{label}</div></div>; }
 function SectionHeading({eyebrow,title,href}:{eyebrow:string;title:string;href:string}) { return <div className="section-rule"><div><div className="kicker">{eyebrow}</div><h2 className="font-serif mt-1 text-3xl font-black">{title}</h2></div><MoreLink href={href} label="View desk" /></div>; }
 function MoreLink({href,label,inverse=false}:{href:string;label:string;inverse?:boolean}) { return <Link href={href} className={`inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.08em] no-underline ${inverse?"text-emerald-300":"text-primary"}`}>{label}<ArrowRight className="h-3.5 w-3.5" /></Link>; }
-function IntelligencePanel({icon:Icon,eyebrow,title,href,children}:{icon:typeof Newspaper;eyebrow:string;title:string;href:string;children:React.ReactNode}) { return <section className="border bg-white p-5 sm:p-6"><div className="flex items-start justify-between gap-4"><div><div className="kicker">{eyebrow}</div><h2 className="font-serif mt-1 text-2xl font-black">{title}</h2></div><Icon className="h-5 w-5 text-primary" /></div><div className="mt-4">{children}</div><div className="mt-4 border-t pt-4"><MoreLink href={href} label="View all" /></div></section>; }
+function EmptyPreview() { return <p className="py-4 text-sm text-muted-foreground">Nothing published in this desk yet.</p>; }
+function SectionPreviewPanel({icon:Icon,eyebrow,title,href,ctaLabel="View all",children}:{icon:typeof Newspaper;eyebrow:string;title:string;href:string;ctaLabel?:string;children:React.ReactNode}) {
+  return <section className="card-lift flex flex-col border bg-white p-5 sm:p-6">
+    <div className="flex items-start justify-between gap-4"><div><div className="kicker">{eyebrow}</div><h3 className="font-serif mt-1 text-xl font-black">{title}</h3></div><Icon className="h-5 w-5 text-primary" /></div>
+    <div className="mt-3 flex-1">{children}</div>
+    <div className="mt-3 border-t pt-4"><MoreLink href={href} label={ctaLabel} /></div>
+  </section>;
+}
 function SpotlightCard({icon:Icon,eyebrow,article}:{icon:typeof Newspaper;eyebrow:string;article:Awaited<ReturnType<typeof getArticles>>[number]}) {
   return <Link href={`/articles/${article.slug}`} className="card-lift group block border bg-white p-6 no-underline">
     <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.13em] text-primary"><Icon className="h-4 w-4" />{eyebrow}</div>
