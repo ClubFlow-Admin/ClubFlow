@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowRight, BarChart3, BriefcaseBusiness, Building2, Clock, Compass, Flame, Handshake, Headphones, MapPin, Newspaper, PiggyBank, Trophy, UserRoundPlus, Wrench } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, Building2, Clock, Compass, Flame, Handshake, Headphones, MapPin, Newspaper, PiggyBank, Trophy, UserRoundPlus, Wrench } from "lucide-react";
 import { CompactArticleRow } from "@/components/article-card";
 import { DailyBrief } from "@/components/daily-brief";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { getArticles } from "@/lib/articles";
+import { clubFlowTake } from "@/lib/executive-brief";
 import { imageForArticle } from "@/lib/images";
 import { prisma } from "@/lib/prisma";
 import { estimateReadingMinutes, formatLocation } from "@/lib/utils";
@@ -56,6 +57,7 @@ export default async function HomePage() {
   const heroLocation = heroArticle ? formatLocation(heroArticle.city, heroArticle.state) : "";
   const heroImage = heroArticle ? imageForArticle(heroArticle, 1400, 1000) : null;
   const heroReadingMinutes = heroArticle ? estimateReadingMinutes(heroArticle.aiSummary, heroArticle.aiWhatHappened, heroArticle.aiWhyItMatters, heroArticle.aiIndustryContext) : 0;
+  const todaysTake = clubFlowTake({ capital: capitalCount, moves: moveCount, jobs: jobCount, technology: technologyCount, deals: dealsCount });
 
   return <main>
     <section className="relative overflow-hidden bg-ink text-white">
@@ -79,7 +81,21 @@ export default async function HomePage() {
             </div>
             <span className="mt-6 inline-flex items-center gap-2 text-sm font-black text-emerald-300 no-underline transition group-hover:gap-3">Read Intelligence Brief <ArrowRight className="h-4 w-4" /></span>
           </Link>
-          <div className="fade-up border border-white/15 bg-white/[.035] p-5 sm:p-6"><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.15em] text-emerald-300"><BarChart3 className="h-4 w-4" /> Industry Snapshot</div><p className="mt-1 text-[11px] font-bold uppercase tracking-[.1em] text-white/45">Today&apos;s Activity</p><div className="mt-5 grid grid-cols-2 gap-px bg-white/15"><Pulse value={capitalCount} label="Capital Projects" /><Pulse value={moveCount} label="Executive Moves" /><Pulse value={technologyCount} label="Technology Stories" /><Pulse value={dealsCount} label="Acquisitions" /><Pulse value={jobCount} label="Open Jobs" /></div></div>
+          <div className="fade-up border border-white/15 bg-white/[.035] p-6 sm:p-7">
+            <div className="text-xs font-black uppercase tracking-[.15em] text-emerald-300">Today&apos;s Executive Brief</div>
+            <p className="mt-1 text-[11px] font-bold uppercase tracking-[.1em] text-white/45">What We&apos;re Seeing Today</p>
+            <div className="mt-6 divide-y divide-white/10">
+              <BriefRow label="Capital Investment" detail={`${capitalCount} projects announced`} />
+              <BriefRow label="Leadership" detail={`${moveCount} executive appointments`} />
+              <BriefRow label="Hiring" detail={`${jobCount} leadership openings`} />
+              <BriefRow label="Technology" detail={`${technologyCount} technology stories`} />
+              <BriefRow label="M&A" detail={`${dealsCount} acquisitions`} />
+            </div>
+            <div className="mt-6 border-t border-white/15 pt-5">
+              <div className="text-[10px] font-black uppercase tracking-[.1em] text-emerald-300">ClubFlow Take</div>
+              <p className="mt-2 text-sm leading-6 text-white/75">{todaysTake}</p>
+            </div>
+          </div>
         </div>
       ) : null}
       {ticker.length ? (
@@ -147,7 +163,7 @@ export default async function HomePage() {
   </main>;
 }
 
-function Pulse({value,label}:{value:number;label:string}) { return <div className="bg-ink p-4"><div className="number-tabular text-2xl font-black text-white">{value}</div><div className="mt-1 text-[10px] font-bold uppercase tracking-[.1em] text-white/45">{label}</div></div>; }
+function BriefRow({label,detail}:{label:string;detail:string}) { return <div className="flex items-baseline justify-between gap-3 py-2.5 first:pt-0 last:pb-0"><span className="text-sm font-bold text-white/85">{label}</span><span className="text-xs text-white/50">{detail}</span></div>; }
 function MoreLink({href,label,inverse=false}:{href:string;label:string;inverse?:boolean}) { return <Link href={href} className={`inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.08em] no-underline ${inverse?"text-emerald-300":"text-primary"}`}>{label}<ArrowRight className="h-3.5 w-3.5" /></Link>; }
 function EmptyPreview() { return <p className="py-4 text-sm text-muted-foreground">Nothing published in this desk yet.</p>; }
 function SectionDirectoryCard({icon:Icon,label,description,href}:{icon:typeof Newspaper;label:string;description:string;href:string}) {
