@@ -229,6 +229,7 @@ model Club {
   description String?
   foundedYear Int?
   holes       Int?
+  tags        String[]     @default([])
   status      EntityStatus @default(active)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
@@ -248,6 +249,7 @@ model Company {
   logoUrl       String?
   description   String?
   headquarters  String?
+  tags          String[]     @default([])
   status        EntityStatus @default(active)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
@@ -268,6 +270,7 @@ model Person {
   photoUrl            String?
   linkedInUrl         String?
   currentOrganization String?
+  tags                String[]     @default([])
   status              EntityStatus @default(active)
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt

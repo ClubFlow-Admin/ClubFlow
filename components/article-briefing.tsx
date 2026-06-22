@@ -7,6 +7,7 @@ import { SectionArticleCard } from "@/components/article-card";
 import { NewsletterForm } from "@/components/newsletter-form";
 import type { ArticleWithRelations } from "@/lib/articles";
 import { businessImpactForArticle, businessImpactSummary } from "@/lib/business-impact";
+import { companyRoutePrefix } from "@/lib/entities";
 import { imageForArticle, resolveArticleImages } from "@/lib/images";
 import { estimateReadingMinutes, formatLocation, isValidExternalSourceUrl } from "@/lib/utils";
 
@@ -235,7 +236,7 @@ export function ArticleBriefing({
                 <div>
                   <div className="kicker">Related companies</div>
                   <div className="mt-3 grid gap-3">
-                    {article.companies.map((company) => <div key={company.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Building2 className="h-4 w-4 text-primary" />{company.name}</div></div>)}
+                    {article.companies.map((company) => <Link key={company.id} href={`${companyRoutePrefix(company.industry)}/${company.slug}`} className="entity-card block no-underline"><div className="flex items-center gap-2.5 text-sm font-black text-foreground"><Building2 className="h-4 w-4 text-primary" />{company.name}</div></Link>)}
                   </div>
                 </div>
               ) : null}
@@ -243,7 +244,7 @@ export function ArticleBriefing({
                 <div>
                   <div className="kicker">Related clubs</div>
                   <div className="mt-3 grid gap-3">
-                    {article.clubs.map((club) => <div key={club.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Flag className="h-4 w-4 text-primary" />{club.name}</div></div>)}
+                    {article.clubs.map((club) => <Link key={club.id} href={`/clubs/${club.slug}`} className="entity-card block no-underline"><div className="flex items-center gap-2.5 text-sm font-black text-foreground"><Flag className="h-4 w-4 text-primary" />{club.name}</div></Link>)}
                   </div>
                 </div>
               ) : null}
@@ -251,7 +252,7 @@ export function ArticleBriefing({
                 <div>
                   <div className="kicker">Related executives</div>
                   <div className="mt-3 grid gap-3">
-                    {article.people.map((person) => <div key={person.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Users className="h-4 w-4 text-primary" />{person.firstName} {person.lastName}</div></div>)}
+                    {article.people.map((person) => <Link key={person.id} href={`/executives/${person.slug}`} className="entity-card block no-underline"><div className="flex items-center gap-2.5 text-sm font-black text-foreground"><Users className="h-4 w-4 text-primary" />{person.firstName} {person.lastName}</div></Link>)}
                   </div>
                 </div>
               ) : null}
