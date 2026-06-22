@@ -8,6 +8,19 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+const SECTION_DIRECTORY = [
+  { icon: Newspaper, label: "Industry", description: "Market, membership, and governance signals.", href: "/industry" },
+  { icon: Building2, label: "Developments", description: "Clubhouse, course, and amenity projects.", href: "/developments" },
+  { icon: UserRoundPlus, label: "Executive Moves", description: "Leadership appointments and transitions.", href: "/executive-moves" },
+  { icon: BriefcaseBusiness, label: "Jobs", description: "Open roles across private clubs.", href: "/jobs" },
+  { icon: Wrench, label: "Technology", description: "Software, data, and operating systems.", href: "/technology" },
+  { icon: Handshake, label: "Mergers & Acquisitions", description: "Ownership changes and management deals.", href: "/mergers-acquisitions" },
+  { icon: PiggyBank, label: "Capital Investments", description: "Capital plans and major asset spending.", href: "/capital-investments" },
+  { icon: Trophy, label: "Club Rankings", description: "Lists, benchmarks, and watchlists.", href: "/club-rankings" },
+  { icon: Headphones, label: "Podcasts", description: "Conversations with club industry leaders.", href: "/podcasts" },
+  { icon: Compass, label: "ClubOpsPro", description: "Consulting, playbooks, and implementation.", href: "/clubopspro" }
+] as const;
+
 export default async function HomePage() {
   const [articles, jobs, moves, developmentProjects, rankings, podcasts] = await Promise.all([
     getArticles({ status: "published" }),
@@ -20,7 +33,6 @@ export default async function HomePage() {
   const topStory = articles[0];
   const briefing = articles.slice(0, 4);
   const ticker = articles.slice(0, 8);
-  const trending = [...articles].sort((a, b) => b.importanceScore - a.importanceScore).filter((article) => article.id !== topStory?.id).slice(0, 5);
   const byCategory = (slug: string, count = 3) => articles.filter((article) => article.category.slug === slug).slice(0, count);
   const industryPreview = byCategory("industry-news");
   const developmentsPreview = byCategory("developments-renovations");
@@ -61,7 +73,12 @@ export default async function HomePage() {
       <div className="mt-7"><FeaturedArticleCard article={topStory} priority /></div>
     </section> : null}
 
-    {trending.length ? <section className="border-y bg-white"><div className="container-shell py-12 sm:py-16"><div className="section-rule"><div><div className="kicker">Trending now</div><h2 className="font-serif mt-1 text-3xl font-black">Most relevant to club leaders this week</h2></div></div><div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">{trending.map((article,index)=><div key={article.id} className="card-lift relative border bg-white p-4"><span className="number-tabular absolute -top-3 left-4 flex h-7 w-7 items-center justify-center rounded-full bg-ink text-sm font-black text-white">{index+1}</span><Link href={`/articles/${article.slug}`} className="no-underline"><div className="mt-3 text-[10px] font-black uppercase tracking-[.1em] text-primary">{article.category.name}</div><h3 className="font-serif mt-2 text-base font-black leading-snug">{article.title}</h3></Link></div>)}</div></div></section> : null}
+    <section className="border-y bg-white"><div className="container-shell py-12 sm:py-16">
+      <div className="section-rule"><div><div className="kicker">Trending now</div><h2 className="font-serif mt-1 text-3xl font-black">Jump straight into any desk.</h2></div></div>
+      <div className="mt-7 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {SECTION_DIRECTORY.map((section)=><SectionDirectoryCard key={section.href} {...section} />)}
+      </div>
+    </div></section>
 
     <section className="container-shell py-12 sm:py-16">
       <div className="section-rule"><div><div className="kicker">Spotlight desks</div><h2 className="font-serif mt-1 text-3xl font-black">Featured across the newsroom</h2></div></div>
@@ -118,6 +135,13 @@ function Pulse({value,label}:{value:number;label:string}) { return <div classNam
 function SectionHeading({eyebrow,title,href}:{eyebrow:string;title:string;href:string}) { return <div className="section-rule"><div><div className="kicker">{eyebrow}</div><h2 className="font-serif mt-1 text-3xl font-black">{title}</h2></div><MoreLink href={href} label="View desk" /></div>; }
 function MoreLink({href,label,inverse=false}:{href:string;label:string;inverse?:boolean}) { return <Link href={href} className={`inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.08em] no-underline ${inverse?"text-emerald-300":"text-primary"}`}>{label}<ArrowRight className="h-3.5 w-3.5" /></Link>; }
 function EmptyPreview() { return <p className="py-4 text-sm text-muted-foreground">Nothing published in this desk yet.</p>; }
+function SectionDirectoryCard({icon:Icon,label,description,href}:{icon:typeof Newspaper;label:string;description:string;href:string}) {
+  return <Link href={href} className="card-lift group flex flex-col gap-3 border bg-white p-5 no-underline">
+    <span className="flex h-9 w-9 items-center justify-center rounded-sm bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-white"><Icon className="h-4.5 w-4.5" /></span>
+    <span className="font-serif text-base font-black leading-snug text-foreground transition group-hover:text-primary">{label}</span>
+    <span className="text-xs leading-5 text-muted-foreground">{description}</span>
+  </Link>;
+}
 function SectionPreviewPanel({icon:Icon,eyebrow,title,href,ctaLabel="View all",children}:{icon:typeof Newspaper;eyebrow:string;title:string;href:string;ctaLabel?:string;children:React.ReactNode}) {
   return <section className="card-lift flex flex-col border bg-white p-5 sm:p-6">
     <div className="flex items-start justify-between gap-4"><div><div className="kicker">{eyebrow}</div><h3 className="font-serif mt-1 text-xl font-black">{title}</h3></div><Icon className="h-5 w-5 text-primary" /></div>
