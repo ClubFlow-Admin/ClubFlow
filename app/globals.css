@@ -51,8 +51,8 @@ a {
 .article-prose h2 { @apply font-serif text-2xl font-black tracking-tight; }
 .article-prose p { @apply mt-4 text-[17px] leading-[1.85] text-foreground/85; max-width: 38rem; }
 .article-prose p:first-of-type { @apply mt-3; }
-.article-prose > section { @apply border-b pb-9; }
-.article-prose > section + section { @apply pt-1; }
+.article-prose > section.with-divider { @apply border-b pb-9; }
+.article-prose > section.with-divider + section { @apply pt-1; }
 
 .premium-callout { @apply border border-primary/15 bg-gradient-to-br from-white to-primary/[.04] p-7 sm:p-9; border-radius: 4px; box-shadow: 0 16px 40px rgba(15, 23, 42, .06); }
 .premium-callout p { @apply mt-4 text-[19px] font-medium leading-[1.8] text-foreground; max-width: 42rem; }
@@ -61,6 +61,27 @@ a {
 .impact-panel { @apply border bg-white p-7 sm:p-9; border-radius: 4px; }
 .entity-card { @apply border bg-white p-5 transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md; border-radius: 4px; }
 .editorial-h2 { @apply font-serif text-[1.7rem] font-black tracking-tight sm:text-3xl; }
+
+.card-lift { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.card-lift:hover { transform: translateY(-3px); box-shadow: 0 18px 38px rgba(15, 23, 42, .09); border-color: hsl(var(--primary) / .25); }
+
+@keyframes cf-fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: cf-fade-up .45s ease-out both; }
+
+@keyframes cf-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ticker-track { display: flex; width: max-content; animation: cf-ticker 38s linear infinite; }
+.ticker-track:hover { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track { animation: none; }
+  .fade-up { animation: none; }
+}
+
+.pull-quote { @apply font-serif border-y-2 border-primary/20 py-6 text-2xl font-black italic leading-snug text-foreground; }
+
+.nav-link-active { @apply text-primary; position: relative; }
+.nav-link-active::after { content: ""; position: absolute; left: .625rem; right: .625rem; bottom: -1px; height: 2px; background: hsl(var(--primary)); }
+
+.mobile-menu-panel { transition: transform .28s ease, opacity .28s ease; }
 
 @media (max-width: 639px) {
   .section-rule { @apply items-start; }

@@ -36,6 +36,19 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
   const keyTakeaways = article.aiKeyTakeaways.slice(0, 5);
   const impactAreas = impactAreasForTags(article.tags);
   const readingMinutes = estimateReadingMinutes(article.aiSummary, whatHappened, whyItMatters, article.aiIndustryContext);
+  const whatHappenedParagraphs = whatHappened ? whatHappened.split(/\n+/).map((p) => p.trim()).filter(Boolean) : [];
+  const pullQuote = keyTakeaways.length && whatHappenedParagraphs.length > 1 ? keyTakeaways[0] : null;
+  const hasEntities = Boolean(article.companies.length || article.clubs.length || article.people.length);
+
+  const tocItems = [
+    { id: "executive-summary", label: "Executive summary" },
+    keyTakeaways.length ? { id: "key-takeaways", label: "Key takeaways" } : null,
+    whatHappened ? { id: "what-happened", label: "What happened" } : null,
+    article.aiIndustryContext ? { id: "industry-context", label: "Industry context" } : null,
+    impactAreas.length ? { id: "financial-impact", label: "Financial & operational impact" } : null,
+    { id: "why-it-matters", label: "Why it matters" },
+    hasEntities ? { id: "related-entities", label: "Related companies, clubs & executives" } : null
+  ].filter(Boolean) as { id: string; label: string }[];
 
   return <main className="bg-background">
     <article>
@@ -62,13 +75,13 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
           <div className="relative h-[280px] overflow-hidden rounded-md border shadow-lg sm:h-[460px]"><Image src={imageForArticle(article)} alt="" fill priority unoptimized sizes="(min-width:1024px) 720px, 100vw" className="object-cover" /></div>
 
           <div className="article-prose mt-14">
-            <section className="border-0 pb-0">
+            <section id="executive-summary">
               <div className="kicker">Executive summary</div>
               <div className="premium-callout mt-4"><Paragraphs text={article.aiSummary} /></div>
             </section>
 
             {keyTakeaways.length ? (
-              <section className="mt-12 border-0 pb-0">
+              <section id="key-takeaways" className="mt-12">
                 <div className="kicker">Key takeaways</div>
                 <div className="takeaway-panel mt-4">
                   <ul className="grid gap-3.5">
@@ -83,12 +96,19 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
               </section>
             ) : null}
 
-            {whatHappened ? <section className="mt-12"><h2 className="editorial-h2">What happened</h2><Paragraphs text={whatHappened} /></section> : null}
+            {whatHappenedParagraphs.length ? (
+              <section id="what-happened" className="mt-12 with-divider">
+                <h2 className="editorial-h2">What happened</h2>
+                <p>{whatHappenedParagraphs[0]}</p>
+                {pullQuote ? <blockquote className="pull-quote my-8">&ldquo;{pullQuote}&rdquo;</blockquote> : null}
+                {whatHappenedParagraphs.slice(1).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+              </section>
+            ) : null}
 
-            {article.aiIndustryContext ? <section className="mt-12"><h2 className="editorial-h2">Industry context</h2><Paragraphs text={article.aiIndustryContext} /></section> : null}
+            {article.aiIndustryContext ? <section id="industry-context" className="mt-12 with-divider"><h2 className="editorial-h2">Industry context</h2><Paragraphs text={article.aiIndustryContext} /></section> : null}
 
             {impactAreas.length ? (
-              <section className="mt-12 border-0 pb-0">
+              <section id="financial-impact" className="mt-12">
                 <h2 className="editorial-h2">Financial &amp; operational impact</h2>
                 <div className="impact-panel mt-4">
                   <div className="flex flex-wrap gap-2.5">
@@ -98,32 +118,36 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
               </section>
             ) : null}
 
-            <section className="mt-12"><h2 className="editorial-h2">Why it matters</h2><Paragraphs text={whyItMatters} /></section>
+            <section id="why-it-matters" className="mt-12 with-divider"><h2 className="editorial-h2">Why it matters</h2><Paragraphs text={whyItMatters} /></section>
 
-            {article.companies.length ? (
-              <section className="mt-12 border-0 pb-0">
-                <h2 className="editorial-h2">Related companies</h2>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {article.companies.map((company) => <div key={company.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Building2 className="h-4 w-4 text-primary" />{company.name}</div></div>)}
-                </div>
-              </section>
-            ) : null}
+            {hasEntities ? (
+              <section id="related-entities" className="mt-12">
+                {article.companies.length ? (
+                  <div className="mb-8">
+                    <h2 className="editorial-h2">Related companies</h2>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      {article.companies.map((company) => <div key={company.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Building2 className="h-4 w-4 text-primary" />{company.name}</div></div>)}
+                    </div>
+                  </div>
+                ) : null}
 
-            {article.clubs.length ? (
-              <section className="mt-12 border-0 pb-0">
-                <h2 className="editorial-h2">Related clubs</h2>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {article.clubs.map((club) => <div key={club.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Flag className="h-4 w-4 text-primary" />{club.name}</div></div>)}
-                </div>
-              </section>
-            ) : null}
+                {article.clubs.length ? (
+                  <div className="mb-8">
+                    <h2 className="editorial-h2">Related clubs</h2>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      {article.clubs.map((club) => <div key={club.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Flag className="h-4 w-4 text-primary" />{club.name}</div></div>)}
+                    </div>
+                  </div>
+                ) : null}
 
-            {article.people.length ? (
-              <section className="mt-12 border-0 pb-0">
-                <h2 className="editorial-h2">Related executives</h2>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {article.people.map((person) => <div key={person.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Users className="h-4 w-4 text-primary" />{person.firstName} {person.lastName}</div></div>)}
-                </div>
+                {article.people.length ? (
+                  <div>
+                    <h2 className="editorial-h2">Related executives</h2>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      {article.people.map((person) => <div key={person.id} className="entity-card"><div className="flex items-center gap-2.5 text-sm font-black"><Users className="h-4 w-4 text-primary" />{person.firstName} {person.lastName}</div></div>)}
+                    </div>
+                  </div>
+                ) : null}
               </section>
             ) : null}
 
@@ -136,17 +160,42 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
 
-        <aside className="h-fit border-t-4 border-primary bg-white p-5 lg:sticky lg:top-5">
-          <div className="kicker">Briefing data</div>
-          <dl className="mt-4 divide-y text-sm">
-            <Meta label="Desk" value={article.category.name} />
-            <Meta label="Source" value={article.source.name} />
-            <Meta label="Published" value={format(article.publishedAt, "MMM d, yyyy")} />
-            <Meta label="Read time" value={`${readingMinutes} min`} />
-            <Meta label="Relevance score" value={`${article.importanceScore}/100`} />
-            {location ? <Meta label="Location" value={location} /> : null}
-          </dl>
-          <div className="mt-5 border-t pt-5"><div className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">ClubFlow standard</div><p className="mt-2 text-xs leading-5 text-muted-foreground">Concise, decision-ready reporting focused exclusively on golf clubs, resorts, operators, and industry partners.</p></div>
+        <aside className="flex h-fit flex-col gap-5 lg:sticky lg:top-5">
+          {tocItems.length > 1 ? (
+            <nav className="hidden border-t-4 border-primary bg-white p-5 lg:block">
+              <div className="kicker">On this brief</div>
+              <ul className="mt-3 grid gap-2 text-sm">
+                {tocItems.map((item) => <li key={item.id}><a href={`#${item.id}`} className="font-semibold text-foreground/80 no-underline hover:text-primary">{item.label}</a></li>)}
+              </ul>
+            </nav>
+          ) : null}
+
+          <div className="border-t-4 border-primary bg-white p-5">
+            <div className="kicker">Briefing data</div>
+            <dl className="mt-4 divide-y text-sm">
+              <Meta label="Desk" value={article.category.name} />
+              <Meta label="Source" value={article.source.name} />
+              <Meta label="Published" value={format(article.publishedAt, "MMM d, yyyy")} />
+              <Meta label="Read time" value={`${readingMinutes} min`} />
+              <Meta label="Relevance score" value={`${article.importanceScore}/100`} />
+              {location ? <Meta label="Location" value={location} /> : null}
+            </dl>
+            <div className="mt-5 border-t pt-5"><div className="text-xs font-black uppercase tracking-[.1em] text-muted-foreground">ClubFlow standard</div><p className="mt-2 text-xs leading-5 text-muted-foreground">Concise, decision-ready reporting focused exclusively on golf clubs, resorts, operators, and industry partners.</p></div>
+          </div>
+
+          {related.length ? (
+            <div className="border bg-white p-5">
+              <div className="kicker">Up next on this desk</div>
+              <div className="mt-3 divide-y">
+                {related.map((item) => (
+                  <Link key={item.id} href={`/articles/${item.slug}`} className="block py-3 no-underline first:pt-3 last:pb-0">
+                    <h3 className="font-serif text-sm font-black leading-snug text-foreground transition hover:text-primary">{item.title}</h3>
+                    <span className="mt-1 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{item.source.name}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </aside>
       </div>
     </article>

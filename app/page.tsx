@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowRight, BarChart3, BriefcaseBusiness, Check, Newspaper, Trophy, UserRoundPlus } from "lucide-react";
+import { ArrowRight, BarChart3, BriefcaseBusiness, Check, Flame, Newspaper, Trophy, UserRoundPlus } from "lucide-react";
 import { CompactArticleRow, FeaturedArticleCard, SectionArticleCard } from "@/components/article-card";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { getArticles } from "@/lib/articles";
@@ -20,19 +20,38 @@ export default async function HomePage() {
   const briefing = articles.slice(0, 5);
   const secondary = articles.slice(1, 3);
   const headlines = articles.slice(3, 7);
+  const ticker = articles.slice(0, 8);
+  const trending = [...articles].sort((a, b) => b.importanceScore - a.importanceScore).filter((article) => article.id !== topStory?.id).slice(0, 5);
   const byCategory = (slug: string, count = 4) => articles.filter((article) => article.category.slug === slug).slice(0, count);
   const developments = byCategory("developments-renovations");
   const capital = byCategory("capital-investments");
   const technology = byCategory("technology", 3);
   const deals = byCategory("mergers-acquisitions");
+  const featuredExecutiveStory = byCategory("executive-moves", 1)[0];
+  const featuredDevelopmentStory = developments[0];
+  const featuredCapitalStory = capital[0];
 
   return <main>
     <section className="relative overflow-hidden bg-ink text-white">
       <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_center,rgba(52,211,153,.12),transparent_65%)]" />
       <div className="container-shell relative grid gap-10 py-12 sm:py-16 lg:grid-cols-[1.25fr_.75fr] lg:items-end">
-        <div><div className="text-xs font-black uppercase tracking-[.2em] text-emerald-300">ClubFlow Executive Intelligence</div><h1 className="font-serif mt-4 max-w-5xl text-balance text-4xl font-black leading-[1.02] sm:text-6xl">Golf industry intelligence for private clubs, resorts, and club leaders.</h1><p className="mt-6 max-w-3xl text-base leading-7 text-white/68 sm:text-xl sm:leading-8">Track the people, projects, investments, jobs, technology, and decisions shaping the private golf club industry.</p><div className="mt-8 flex flex-wrap gap-3"><Link href="#todays-brief" className="rounded-sm bg-emerald-400 px-5 py-3 text-sm font-black text-slate-950 no-underline hover:bg-emerald-300">View Today&apos;s Brief</Link><Link href="/newsletter" className="rounded-sm border border-white/30 px-5 py-3 text-sm font-black text-white no-underline hover:border-white">Subscribe to Newsletter</Link></div></div>
-        <div className="border border-white/15 bg-white/[.035] p-5 sm:p-6"><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.15em] text-emerald-300"><BarChart3 className="h-4 w-4" /> Market pulse</div><div className="mt-5 grid grid-cols-2 gap-px bg-white/15"><Pulse value={articles.length} label="Published briefs" /><Pulse value={developmentProjects} label="Projects tracked" /><Pulse value={moves.length} label="Recent moves" /><Pulse value={jobs.length} label="Open roles" /></div><p className="mt-4 text-xs leading-5 text-white/45">Decision-ready coverage across the business of private golf clubs.</p></div>
+        <div className="fade-up"><div className="text-xs font-black uppercase tracking-[.2em] text-emerald-300">ClubFlow Executive Intelligence</div><h1 className="font-serif mt-4 max-w-5xl text-balance text-4xl font-black leading-[1.02] sm:text-6xl">Golf industry intelligence for private clubs, resorts, and club leaders.</h1><p className="mt-6 max-w-3xl text-base leading-7 text-white/68 sm:text-xl sm:leading-8">Track the people, projects, investments, jobs, technology, and decisions shaping the private golf club industry.</p><div className="mt-8 flex flex-wrap gap-3"><Link href="#todays-brief" className="rounded-sm bg-emerald-400 px-5 py-3 text-sm font-black text-slate-950 no-underline transition hover:bg-emerald-300">View Today&apos;s Brief</Link><Link href="/newsletter" className="rounded-sm border border-white/30 px-5 py-3 text-sm font-black text-white no-underline transition hover:border-white">Subscribe to Newsletter</Link></div></div>
+        <div className="fade-up border border-white/15 bg-white/[.035] p-5 sm:p-6"><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.15em] text-emerald-300"><BarChart3 className="h-4 w-4" /> Market pulse</div><div className="mt-5 grid grid-cols-2 gap-px bg-white/15"><Pulse value={articles.length} label="Published briefs" /><Pulse value={developmentProjects} label="Projects tracked" /><Pulse value={moves.length} label="Recent moves" /><Pulse value={jobs.length} label="Open roles" /></div><p className="mt-4 text-xs leading-5 text-white/45">Decision-ready coverage across the business of private golf clubs.</p></div>
       </div>
+      {ticker.length ? (
+        <div className="relative border-t border-white/10 bg-black/25">
+          <div className="overflow-hidden py-2.5">
+            <div className="ticker-track">
+              {[...ticker, ...ticker].map((article, index) => (
+                <Link key={`${article.id}-${index}`} href={`/articles/${article.slug}`} className="flex items-center gap-2 whitespace-nowrap px-6 text-xs font-bold text-white/75 no-underline hover:text-emerald-300">
+                  <span className="flex items-center gap-1 text-emerald-300"><Flame className="h-3 w-3" /> BREAKING</span>
+                  {article.title}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
 
     <section id="todays-brief" className="border-b bg-white"><div className="container-shell grid lg:grid-cols-[230px_1fr]"><div className="border-b py-6 lg:border-b-0 lg:border-r lg:pr-6"><div className="kicker">Today&apos;s ClubFlow Brief</div><h2 className="font-serif mt-2 text-2xl font-black">The morning read for club decision-makers.</h2><p className="mt-3 text-xs leading-5 text-muted-foreground">Top signals, ranked by relevance to operators, boards, partners, and investors.</p></div><div className="grid gap-x-6 py-2 sm:grid-cols-2 lg:px-6 xl:grid-cols-3">{briefing.map((article)=><CompactArticleRow key={article.id} article={article} />)}</div></div></section>
@@ -41,6 +60,17 @@ export default async function HomePage() {
       <SectionHeading eyebrow="Lead intelligence" title="What club leaders need to know now" href="/industry" />
       {topStory ? <div className="mt-6"><FeaturedArticleCard article={topStory} priority /></div> : null}
       <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_1fr_.9fr]">{secondary.map((article)=><SectionArticleCard key={article.id} article={article} />)}<div className="border bg-muted/35 px-5"><div className="border-b py-4 text-xs font-black uppercase tracking-[.14em] text-primary">Also on the wire</div>{headlines.map((article)=><CompactArticleRow key={article.id} article={article} />)}</div></div>
+    </section>
+
+    {trending.length ? <section className="border-y bg-white"><div className="container-shell py-10 sm:py-12"><div className="section-rule"><div><div className="kicker">Trending now</div><h2 className="font-serif mt-1 text-3xl font-black">Most relevant to club leaders this week</h2></div></div><div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">{trending.map((article,index)=><div key={article.id} className="card-lift relative border bg-white p-4"><span className="number-tabular absolute -top-3 left-4 flex h-7 w-7 items-center justify-center rounded-full bg-ink text-sm font-black text-white">{index+1}</span><Link href={`/articles/${article.slug}`} className="no-underline"><div className="mt-3 text-[10px] font-black uppercase tracking-[.1em] text-primary">{article.category.name}</div><h3 className="font-serif mt-2 text-base font-black leading-snug">{article.title}</h3></Link></div>)}</div></div></section> : null}
+
+    <section className="container-shell py-10 sm:py-12">
+      <div className="section-rule"><div><div className="kicker">Spotlight desks</div><h2 className="font-serif mt-1 text-3xl font-black">Featured across the newsroom</h2></div></div>
+      <div className="mt-6 grid gap-5 lg:grid-cols-3">
+        {featuredExecutiveStory ? <SpotlightCard icon={UserRoundPlus} eyebrow="Featured executive" article={featuredExecutiveStory} /> : null}
+        {featuredDevelopmentStory ? <SpotlightCard icon={BarChart3} eyebrow="Featured development" article={featuredDevelopmentStory} /> : null}
+        {featuredCapitalStory ? <SpotlightCard icon={Trophy} eyebrow="Featured capital investment" article={featuredCapitalStory} /> : null}
+      </div>
     </section>
 
     <section className="border-y bg-white"><div className="container-shell py-10 sm:py-12"><SectionHeading eyebrow="Development intelligence" title="Club Development Tracker" href="/developments" />{developments.length?<div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_.8fr]"><SectionArticleCard article={developments[0]} /><div className="border-y">{developments.slice(1).map((article)=><CompactArticleRow key={article.id} article={article} />)}</div></div>:null}</div></section>
@@ -68,3 +98,11 @@ function Pulse({value,label}:{value:number;label:string}) { return <div classNam
 function SectionHeading({eyebrow,title,href}:{eyebrow:string;title:string;href:string}) { return <div className="section-rule"><div><div className="kicker">{eyebrow}</div><h2 className="font-serif mt-1 text-3xl font-black">{title}</h2></div><MoreLink href={href} label="View desk" /></div>; }
 function MoreLink({href,label,inverse=false}:{href:string;label:string;inverse?:boolean}) { return <Link href={href} className={`inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.08em] no-underline ${inverse?"text-emerald-300":"text-primary"}`}>{label}<ArrowRight className="h-3.5 w-3.5" /></Link>; }
 function IntelligencePanel({icon:Icon,eyebrow,title,href,children}:{icon:typeof Newspaper;eyebrow:string;title:string;href:string;children:React.ReactNode}) { return <section className="border bg-white p-5 sm:p-6"><div className="flex items-start justify-between gap-4"><div><div className="kicker">{eyebrow}</div><h2 className="font-serif mt-1 text-2xl font-black">{title}</h2></div><Icon className="h-5 w-5 text-primary" /></div><div className="mt-4">{children}</div><div className="mt-4 border-t pt-4"><MoreLink href={href} label="View all" /></div></section>; }
+function SpotlightCard({icon:Icon,eyebrow,article}:{icon:typeof Newspaper;eyebrow:string;article:Awaited<ReturnType<typeof getArticles>>[number]}) {
+  return <Link href={`/articles/${article.slug}`} className="card-lift group block border bg-white p-6 no-underline">
+    <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.13em] text-primary"><Icon className="h-4 w-4" />{eyebrow}</div>
+    <h3 className="font-serif mt-3 text-xl font-black leading-snug text-foreground transition group-hover:text-primary">{article.title}</h3>
+    <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{article.dek || article.aiSummary}</p>
+    <div className="mt-4 inline-flex items-center gap-2 border-t pt-4 text-xs font-black uppercase tracking-[.08em] text-primary">Read brief<ArrowRight className="h-3.5 w-3.5" /></div>
+  </Link>;
+}
