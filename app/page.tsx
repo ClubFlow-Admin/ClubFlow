@@ -1,10 +1,14 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BarChart3, BriefcaseBusiness, Building2, Compass, Flame, Handshake, Headphones, Newspaper, PiggyBank, Trophy, UserRoundPlus, Wrench } from "lucide-react";
-import { CompactArticleRow, FeaturedArticleCard } from "@/components/article-card";
+import { format } from "date-fns";
+import { ArrowRight, BarChart3, BriefcaseBusiness, Building2, Clock, Compass, Flame, Handshake, Headphones, MapPin, Newspaper, PiggyBank, Trophy, UserRoundPlus, Wrench } from "lucide-react";
+import { CompactArticleRow } from "@/components/article-card";
 import { DailyBrief } from "@/components/daily-brief";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { getArticles } from "@/lib/articles";
+import { imageForArticle } from "@/lib/images";
 import { prisma } from "@/lib/prisma";
+import { estimateReadingMinutes, formatLocation } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -22,13 +26,14 @@ const SECTION_DIRECTORY = [
 ] as const;
 
 export default async function HomePage() {
-  const [articles, jobs, moves, developmentProjects, rankings, podcasts] = await Promise.all([
+  const [articles, jobs, moves, rankings, podcasts, jobCount, moveCount] = await Promise.all([
     getArticles({ status: "published" }),
     prisma.jobPosting.findMany({ where: { status: "published" }, orderBy: { postedAt: "desc" }, take: 3 }),
     prisma.executiveMove.findMany({ where: { status: "published" }, orderBy: [{ effectiveAt: "desc" }, { updatedAt: "desc" }], take: 3 }),
-    prisma.developmentProject.count(),
     prisma.rankingEntry.findMany({ where: { status: "published" }, orderBy: [{ category: "asc" }, { rank: "asc" }], take: 3 }),
-    prisma.podcastEpisode.findMany({ where: { status: "published" }, orderBy: { createdAt: "asc" }, take: 3 })
+    prisma.podcastEpisode.findMany({ where: { status: "published" }, orderBy: { createdAt: "asc" }, take: 3 }),
+    prisma.jobPosting.count({ where: { status: "published" } }),
+    prisma.executiveMove.count({ where: { status: "published" } })
   ]);
 
   // The hero leads with the biggest Industry story (the desk that matters most to club leaders day to day);
@@ -43,13 +48,40 @@ export default async function HomePage() {
   const dealsPreview = byCategory("mergers-acquisitions");
   const capitalPreview = byCategory("capital-investments");
 
+  // Snapshot counts reuse the articles/jobs/moves already fetched above — no extra article queries.
+  const capitalCount = articles.filter((article) => article.category.slug === "capital-investments").length;
+  const technologyCount = articles.filter((article) => article.category.slug === "technology").length;
+  const dealsCount = articles.filter((article) => article.category.slug === "mergers-acquisitions").length;
+
+  const heroLocation = heroArticle ? formatLocation(heroArticle.city, heroArticle.state) : "";
+  const heroImage = heroArticle ? imageForArticle(heroArticle, 1400, 1000) : null;
+  const heroReadingMinutes = heroArticle ? estimateReadingMinutes(heroArticle.aiSummary, heroArticle.aiWhatHappened, heroArticle.aiWhyItMatters, heroArticle.aiIndustryContext) : 0;
+
   return <main>
     <section className="relative overflow-hidden bg-ink text-white">
       <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_center,rgba(52,211,153,.12),transparent_65%)]" />
-      <div className="container-shell relative grid gap-8 py-10 sm:py-14 lg:grid-cols-[1.25fr_.75fr] lg:items-end">
-        <div className="fade-up"><div className="text-xs font-black uppercase tracking-[.2em] text-emerald-300">ClubFlow Executive Intelligence</div><h1 className="font-serif mt-4 max-w-5xl text-balance text-4xl font-black leading-[1.02] sm:text-6xl">Golf industry intelligence for private clubs, resorts, and club leaders.</h1><p className="mt-6 max-w-3xl text-base leading-7 text-white/68 sm:text-xl sm:leading-8">Track the people, projects, investments, jobs, technology, and decisions shaping the private golf club industry.</p><div className="mt-8 flex flex-wrap gap-3"><Link href="#clubflow-daily" className="rounded-sm bg-emerald-400 px-5 py-3 text-sm font-black text-slate-950 no-underline transition hover:bg-emerald-300">View ClubFlow Daily</Link><Link href="/newsletter" className="rounded-sm border border-white/30 px-5 py-3 text-sm font-black text-white no-underline transition hover:border-white">Subscribe to Newsletter</Link></div></div>
-        <div className="fade-up border border-white/15 bg-white/[.035] p-5 sm:p-6"><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.15em] text-emerald-300"><BarChart3 className="h-4 w-4" /> Market pulse</div><div className="mt-5 grid grid-cols-2 gap-px bg-white/15"><Pulse value={articles.length} label="Published briefs" /><Pulse value={developmentProjects} label="Projects tracked" /><Pulse value={moves.length} label="Recent moves" /><Pulse value={jobs.length} label="Open roles" /></div><p className="mt-4 text-xs leading-5 text-white/45">Decision-ready coverage across the business of private golf clubs.</p></div>
-      </div>
+      {heroArticle && heroImage ? (
+        <div className="container-shell relative grid gap-8 py-10 sm:py-14 lg:grid-cols-[7fr_3fr] lg:items-start">
+          <Link href={`/articles/${heroArticle.slug}`} className="fade-up group block no-underline">
+            <div className="relative h-[220px] overflow-hidden rounded-sm sm:h-[340px] lg:h-[420px]">
+              <Image src={heroImage.src} alt={heroImage.alt} fill priority unoptimized sizes="(min-width:1024px) 65vw, 100vw" className="object-cover transition duration-700 ease-out group-hover:scale-[1.03]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <div className="absolute left-4 top-4"><span className="inline-flex items-center px-2 py-0.5 text-[10px] font-black uppercase tracking-[.1em] bg-emerald-400/15 text-emerald-300">{heroArticle.category.name}</span></div>
+            </div>
+            <h2 className="font-serif mt-5 text-balance text-3xl font-black leading-[1.05] transition group-hover:text-emerald-300 sm:text-4xl lg:text-5xl">{heroArticle.title}</h2>
+            <p className="mt-4 max-w-3xl text-base leading-7 text-white/72 sm:text-lg sm:leading-8">{heroArticle.dek || heroArticle.aiSummary}</p>
+            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-bold uppercase tracking-[.08em] text-white/55">
+              <time dateTime={heroArticle.publishedAt.toISOString()}>{format(heroArticle.publishedAt, "MMM d, yyyy")}</time>
+              <span aria-hidden="true">·</span>
+              <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{heroReadingMinutes} min read</span>
+              {heroArticle.clubName ? <><span aria-hidden="true">·</span><span>{heroArticle.clubName}</span></> : null}
+              {heroLocation ? <><span aria-hidden="true">·</span><span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{heroLocation}</span></> : null}
+            </div>
+            <span className="mt-6 inline-flex items-center gap-2 text-sm font-black text-emerald-300 no-underline transition group-hover:gap-3">Read Intelligence Brief <ArrowRight className="h-4 w-4" /></span>
+          </Link>
+          <div className="fade-up border border-white/15 bg-white/[.035] p-5 sm:p-6"><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.15em] text-emerald-300"><BarChart3 className="h-4 w-4" /> Industry Snapshot</div><p className="mt-1 text-[11px] font-bold uppercase tracking-[.1em] text-white/45">Today&apos;s Activity</p><div className="mt-5 grid grid-cols-2 gap-px bg-white/15"><Pulse value={capitalCount} label="Capital Projects" /><Pulse value={moveCount} label="Executive Moves" /><Pulse value={technologyCount} label="Technology Stories" /><Pulse value={dealsCount} label="Acquisitions" /><Pulse value={jobCount} label="Open Jobs" /></div></div>
+        </div>
+      ) : null}
       {ticker.length ? (
         <div className="relative border-t border-white/10 bg-black/25">
           <div className="overflow-hidden py-2.5">
@@ -62,11 +94,6 @@ export default async function HomePage() {
               ))}
             </div>
           </div>
-        </div>
-      ) : null}
-      {heroArticle ? (
-        <div className="border-t border-white/10 bg-black/15">
-          <div className="container-shell py-7 sm:py-9"><FeaturedArticleCard article={heroArticle} priority /></div>
         </div>
       ) : null}
     </section>
