@@ -1,0 +1,652 @@
+{
+  "industry": [
+    {
+      "file": "01.jpg",
+      "sourceTitle": "File:Cosmopolitan Club Golf Course Aerial Chennai Jul18 DSC05377.jpg",
+      "artist": "Timothy A. Gonsalves",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cosmopolitan_Club_Golf_Course_Aerial_Chennai_Jul18_DSC05377.jpg"
+    },
+    {
+      "file": "02.jpg",
+      "sourceTitle": "File:Aerial view of Westwood Golf Course Leek.jpg",
+      "artist": "Gkbediako",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_Westwood_Golf_Course_Leek.jpg"
+    },
+    {
+      "file": "03.jpg",
+      "sourceTitle": "File:Trump National Doral.jpg",
+      "artist": "Albert Boneta",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Trump_National_Doral.jpg"
+    },
+    {
+      "file": "04.jpg",
+      "sourceTitle": "File:DZ6 2503 Sunlit golf course pond framed by palm trees and a clear blue sky.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2503_Sunlit_golf_course_pond_framed_by_palm_trees_and_a_clear_blue_sky.jpg"
+    },
+    {
+      "file": "05.jpg",
+      "sourceTitle": "File:DZ6 2426 A peaceful tree-lined path winding alongside a sunlit golf course at golden hour.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2426_A_peaceful_tree-lined_path_winding_alongside_a_sunlit_golf_course_at_golden_hour.jpg"
+    },
+    {
+      "file": "06.jpg",
+      "sourceTitle": "File:DZ6 2469 Golden afternoon on the golf course sunlight washes over manicured greens and a peaceful pavilion.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2469_Golden_afternoon_on_the_golf_course_sunlight_washes_over_manicured_greens_and_a_peaceful_pavilion.jpg"
+    },
+    {
+      "file": "07.jpg",
+      "sourceTitle": "File:DZ6 2478 Sunny afternoon on the golf course - a lone cart rolls along the cart path under blue skies.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2478_Sunny_afternoon_on_the_golf_course_-_a_lone_cart_rolls_along_the_cart_path_under_blue_skies.jpg"
+    },
+    {
+      "file": "08.jpg",
+      "sourceTitle": "File:DZ6 2492 Sunny day on the golf course carts lined up by the path as players enjoy a round under blue skies.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2492_Sunny_day_on_the_golf_course_carts_lined_up_by_the_path_as_players_enjoy_a_round_under_blue_skies.jpg"
+    },
+    {
+      "file": "09.jpg",
+      "sourceTitle": "File:DZ6 2460 A lone tree standing beside the winding cart path on a sunny day at the golf course.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2460_A_lone_tree_standing_beside_the_winding_cart_path_on_a_sunny_day_at_the_golf_course.jpg"
+    }
+  ],
+  "club-developments": [
+    {
+      "file": "01.jpg",
+      "sourceTitle": "File:Crane at construction site - geograph.org.uk - 7593527.jpg",
+      "artist": "Kevin Waterhouse",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Crane_at_construction_site_-_geograph.org.uk_-_7593527.jpg"
+    },
+    {
+      "file": "02.jpg",
+      "sourceTitle": "File:Crane on Akihabara Center Place Building construction site (2006-08-19 18.21.29 by OiMax).jpg",
+      "artist": "OiMax",
+      "license": "CC BY 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Crane_on_Akihabara_Center_Place_Building_construction_site_(2006-08-19_18.21.29_by_OiMax).jpg"
+    },
+    {
+      "file": "03.jpg",
+      "sourceTitle": "File:11 Liebherr construction crane at a Strabag company construction site of apartment building in Budapest, Hungary.jpg",
+      "artist": "Marek \u015alusarczyk (Tupungato) Photo portfolio",
+      "license": "CC BY 3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:11_Liebherr_construction_crane_at_a_Strabag_company_construction_site_of_apartment_building_in_Budapest,_Hungary.jpg"
+    },
+    {
+      "file": "04.jpg",
+      "sourceTitle": "File:Building construction crane Moira Close Broadwater Farm Haringey 2025 82.jpg",
+      "artist": "Acabashi",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Building_construction_crane_Moira_Close_Broadwater_Farm_Haringey_2025_82.jpg"
+    },
+    {
+      "file": "05.jpg",
+      "sourceTitle": "File:Building construction crane Moira Close Broadwater Farm Haringey 2025 09.jpg",
+      "artist": "Acabashi",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Building_construction_crane_Moira_Close_Broadwater_Farm_Haringey_2025_09.jpg"
+    },
+    {
+      "file": "06.jpg",
+      "sourceTitle": "File:Building construction crane Moira Close Broadwater Farm Haringey 2025 08.jpg",
+      "artist": "Acabashi",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Building_construction_crane_Moira_Close_Broadwater_Farm_Haringey_2025_08.jpg"
+    },
+    {
+      "file": "07.jpg",
+      "sourceTitle": "File:Building construction crane Moira Close Broadwater Farm Haringey 2025 04.jpg",
+      "artist": "Acabashi",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Building_construction_crane_Moira_Close_Broadwater_Farm_Haringey_2025_04.jpg"
+    },
+    {
+      "file": "08.jpg",
+      "sourceTitle": "File:Building construction crane Moira Close Broadwater Farm Haringey 2025 45.jpg",
+      "artist": "Acabashi",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Building_construction_crane_Moira_Close_Broadwater_Farm_Haringey_2025_45.jpg"
+    },
+    {
+      "file": "09.jpg",
+      "sourceTitle": "File:Architectural rendering of proposed hospital building in 1945.jpg",
+      "artist": "Akhanimov2284",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Architectural_rendering_of_proposed_hospital_building_in_1945.jpg"
+    }
+  ],
+  "executive-moves": [
+    {
+      "file": "01.jpg",
+      "sourceTitle": "File:Horasis Global China Business Meeting 2013 - boardroom panel (10865474346).jpg",
+      "artist": "Richter Frank-Jurgen",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Horasis_Global_China_Business_Meeting_2013_-_boardroom_panel_(10865474346).jpg"
+    },
+    {
+      "file": "02.jpg",
+      "sourceTitle": "File:A boardroom dialogue session at the 2011 Horasis Global Arab Business Meeting (6247249028).jpg",
+      "artist": "Richter Frank-Jurgen",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_boardroom_dialogue_session_at_the_2011_Horasis_Global_Arab_Business_Meeting_(6247249028).jpg"
+    },
+    {
+      "file": "03.jpg",
+      "sourceTitle": "File:Levin Zhu, CEO, CICC, at a boardroom dialogue session, at the Horasis Global China Business Meeting 2009 - Flickr - Horasis.jpg",
+      "artist": "Richter Frank-Jurgen",
+      "license": "CC BY 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Levin_Zhu,_CEO,_CICC,_at_a_boardroom_dialogue_session,_at_the_Horasis_Global_China_Business_Meeting_2009_-_Flickr_-_Horasis.jpg"
+    },
+    {
+      "file": "04.jpg",
+      "sourceTitle": "File:N1 Hotel Rotten Row Boardroom Facility.jpg",
+      "artist": "Rufouslark",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:N1_Hotel_Rotten_Row_Boardroom_Facility.jpg"
+    },
+    {
+      "file": "05.jpg",
+      "sourceTitle": "File:Ford A9029 NLGRF photo contact sheet (1976-03-31)(Gerald Ford Library).jpg",
+      "artist": "White House Photographic Office (WHPO) - Fitz-Patrick",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ford_A9029_NLGRF_photo_contact_sheet_(1976-03-31)(Gerald_Ford_Library).jpg"
+    },
+    {
+      "file": "06.jpg",
+      "sourceTitle": "File:Ford A9021 NLGRF photo contact sheet (1976-03-31)(Gerald Ford Library).jpg",
+      "artist": "White House Photographic Office (WHPO) - Fitz-Patrick",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ford_A9021_NLGRF_photo_contact_sheet_(1976-03-31)(Gerald_Ford_Library).jpg"
+    },
+    {
+      "file": "07.jpg",
+      "sourceTitle": "File:Hotel Na Knizeci Dobris 1935.jpg",
+      "artist": "Author of this photo is unknown person.",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hotel_Na_Knizeci_Dobris_1935.jpg"
+    },
+    {
+      "file": "08.jpg",
+      "sourceTitle": "File:Ford B2095 NLGRF photo contact sheet (1976-10-26)(Gerald Ford Library).jpg",
+      "artist": "White House Photographic Office (WHPO) - Thomas",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ford_B2095_NLGRF_photo_contact_sheet_(1976-10-26)(Gerald_Ford_Library).jpg"
+    },
+    {
+      "file": "09.jpg",
+      "sourceTitle": "File:Ford B0159 NLGRF photo contact sheet (1976-06-09)(Gerald Ford Library).jpg",
+      "artist": "White House Photographic Office (WHPO) - Fitz-Patrick",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ford_B0159_NLGRF_photo_contact_sheet_(1976-06-09)(Gerald_Ford_Library).jpg"
+    }
+  ],
+  "jobs": [
+    {
+      "file": "01.jpg",
+      "sourceTitle": "File:Lobby lounge of Amantaka Suite Amantaka luxury Resort & Hotel Luang Prabang Laos.jpg",
+      "artist": "Basile Morin",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lobby_lounge_of_Amantaka_Suite_Amantaka_luxury_Resort_%26_Hotel_Luang_Prabang_Laos.jpg"
+    },
+    {
+      "file": "02.jpg",
+      "sourceTitle": "File:Entrance lobby of Amantaka luxury Resort & Hotel at blue hour in Luang Prabang Laos.jpg",
+      "artist": "Basile Morin",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Entrance_lobby_of_Amantaka_luxury_Resort_%26_Hotel_at_blue_hour_in_Luang_Prabang_Laos.jpg"
+    },
+    {
+      "file": "03.jpg",
+      "sourceTitle": "File:Reception lounge at Amantaka luxury Resort & Hotel at blue hour in Luang Prabang Laos.jpg",
+      "artist": "Basile Morin",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Reception_lounge_at_Amantaka_luxury_Resort_%26_Hotel_at_blue_hour_in_Luang_Prabang_Laos.jpg"
+    },
+    {
+      "file": "04.jpg",
+      "sourceTitle": "File:Entrance lobby of Amantaka luxury Resort & Hotel in Luang Prabang Laos.jpg",
+      "artist": "Basile Morin",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Entrance_lobby_of_Amantaka_luxury_Resort_%26_Hotel_in_Luang_Prabang_Laos.jpg"
+    },
+    {
+      "file": "05.jpg",
+      "sourceTitle": "File:Reception desks of Amantaka luxury Resort & Hotel in Luang Prabang Laos.jpg",
+      "artist": "Basile Morin",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Reception_desks_of_Amantaka_luxury_Resort_%26_Hotel_in_Luang_Prabang_Laos.jpg"
+    },
+    {
+      "file": "06.jpg",
+      "sourceTitle": "File:Lounge at Amantaka luxury Resort & Hotel at blue hour in Luang Prabang Laos.jpg",
+      "artist": "Basile Morin",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lounge_at_Amantaka_luxury_Resort_%26_Hotel_at_blue_hour_in_Luang_Prabang_Laos.jpg"
+    },
+    {
+      "file": "07.jpg",
+      "sourceTitle": "File:Reception lounge of the spa at Amantaka luxury Resort & Hotel in Luang Prabang Laos.jpg",
+      "artist": "Basile Morin",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Reception_lounge_of_the_spa_at_Amantaka_luxury_Resort_%26_Hotel_in_Luang_Prabang_Laos.jpg"
+    },
+    {
+      "file": "08.jpg",
+      "sourceTitle": "File:Reception of AMOY by Far East Hospitality, Singapore - 20151010.jpg",
+      "artist": "Jacklee",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Reception_of_AMOY_by_Far_East_Hospitality,_Singapore_-_20151010.jpg"
+    },
+    {
+      "file": "09.jpg",
+      "sourceTitle": "File:Reception lounge of the spa at Amantaka luxury Resort & Hotel in Luang Prabang Laos side view.jpg",
+      "artist": "Basile Morin",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Reception_lounge_of_the_spa_at_Amantaka_luxury_Resort_%26_Hotel_in_Luang_Prabang_Laos_side_view.jpg"
+    }
+  ],
+  "technology": [
+    {
+      "file": "01.jpg",
+      "sourceTitle": "File:BalticServers data center.jpg",
+      "artist": "BalticServers.com",
+      "license": "CC BY-SA 3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:BalticServers_data_center.jpg"
+    },
+    {
+      "file": "02.jpg",
+      "sourceTitle": "File:Data Center 3 (UNC).jpg",
+      "artist": "Ana Las Heras",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Data_Center_3_(UNC).jpg"
+    },
+    {
+      "file": "03.jpg",
+      "sourceTitle": "File:Data Center 2 (UNC).jpg",
+      "artist": "Ana Las Heras",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Data_Center_2_(UNC).jpg"
+    },
+    {
+      "file": "04.jpg",
+      "sourceTitle": "File:Virginia Tech - data center.jpg",
+      "artist": "Christopher Bowns",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Virginia_Tech_-_data_center.jpg"
+    },
+    {
+      "file": "05.jpg",
+      "sourceTitle": "File:Data center roof.jpg",
+      "artist": "Rsparks3",
+      "license": "CC0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Data_center_roof.jpg"
+    },
+    {
+      "file": "06.jpg",
+      "sourceTitle": "File:Duga-1 radar data center interior server room 2018.jpg",
+      "artist": "Jo\u00ebl van der Loo",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Duga-1_radar_data_center_interior_server_room_2018.jpg"
+    },
+    {
+      "file": "07.jpg",
+      "sourceTitle": "File:123Net Data Center (DC2).jpg",
+      "artist": "123net",
+      "license": "CC BY-SA 3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:123Net_Data_Center_(DC2).jpg"
+    },
+    {
+      "file": "08.jpg",
+      "sourceTitle": "File:Data Center c\u1ee7a CMC Telecom (2).jpg",
+      "artist": "Daoducquan",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Data_Center_c%E1%BB%A7a_CMC_Telecom_(2).jpg"
+    },
+    {
+      "file": "09.jpg",
+      "sourceTitle": "File:CERN data centre.jpg",
+      "artist": "Unnerving duck",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:CERN_data_centre.jpg"
+    }
+  ],
+  "mergers-acquisitions": [
+    {
+      "file": "01.jpg",
+      "sourceTitle": "File:N facade and main entrance - Tudor Arms Hotel.jpg",
+      "artist": "Tim Evanson",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:N_facade_and_main_entrance_-_Tudor_Arms_Hotel.jpg"
+    },
+    {
+      "file": "02.jpg",
+      "sourceTitle": "File:Looking SW at N facade and main entrance - Tudor Arms Hotel.jpg",
+      "artist": "Tim Evanson",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Looking_SW_at_N_facade_and_main_entrance_-_Tudor_Arms_Hotel.jpg"
+    },
+    {
+      "file": "03.jpg",
+      "sourceTitle": "File:Pal\u00e1cio Ludovice Wine Experience Hotel Entrance at Night, Lisbon (54748362902).jpg",
+      "artist": "Dale Cruse - 10M views from San Francisco, CA, USA",
+      "license": "CC BY 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pal%C3%A1cio_Ludovice_Wine_Experience_Hotel_Entrance_at_Night,_Lisbon_(54748362902).jpg"
+    },
+    {
+      "file": "04.jpg",
+      "sourceTitle": "File:Altis Avenida Hotel, Pra\u00e7a dos Restauradores, Lisbon (54872658752).jpg",
+      "artist": "Dale Cruse - 10M views from San Francisco, CA, USA",
+      "license": "CC BY 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Altis_Avenida_Hotel,_Pra%C3%A7a_dos_Restauradores,_Lisbon_(54872658752).jpg"
+    },
+    {
+      "file": "05.jpg",
+      "sourceTitle": "File:Drake Hotel, Chicago, Illinois (42718090014).jpg",
+      "artist": "Ken Lund from Reno, Nevada, USA",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Drake_Hotel,_Chicago,_Illinois_(42718090014).jpg"
+    },
+    {
+      "file": "06.jpg",
+      "sourceTitle": "File:St. Pancras Renaissance London Hotel (16091039608).jpg",
+      "artist": "Loco Steve from Bromley , UK",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:St._Pancras_Renaissance_London_Hotel_(16091039608).jpg"
+    },
+    {
+      "file": "07.jpg",
+      "sourceTitle": "File:49 West 9th Street (1855, facade altered 1897-98), Greenwich Village, New York - Flickr - Spencer Means.jpg",
+      "artist": "Spencer Means from New York City, USA",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:49_West_9th_Street_(1855,_facade_altered_1897-98),_Greenwich_Village,_New_York_-_Flickr_-_Spencer_Means.jpg"
+    },
+    {
+      "file": "08.jpg",
+      "sourceTitle": "File:DZ6 0939 A modern hotel building lit up at night its triangular fa\u00e7ade and rows of balconies glowing against the dark sky.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_0939_A_modern_hotel_building_lit_up_at_night_its_triangular_fa%C3%A7ade_and_rows_of_balconies_glowing_against_the_dark_sky.jpg"
+    },
+    {
+      "file": "09.jpg",
+      "sourceTitle": "File:The Drake, Chicago, Illinois (42488256215).jpg",
+      "artist": "Ken Lund from Reno, Nevada, USA",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Drake,_Chicago,_Illinois_(42488256215).jpg"
+    }
+  ],
+  "capital-investments": [
+    {
+      "file": "01.jpg",
+      "sourceTitle": "File:Swimming pool of Khan Pool Suite in Amantaka luxury Resort & Hotel in Luang Prabang Laos.jpg",
+      "artist": "Basile Morin",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Swimming_pool_of_Khan_Pool_Suite_in_Amantaka_luxury_Resort_%26_Hotel_in_Luang_Prabang_Laos.jpg"
+    },
+    {
+      "file": "02.jpg",
+      "sourceTitle": "File:Swimming pool and terrasse of Amantaka luxury Resort & Hotel in Luang Prabang Laos.jpg",
+      "artist": "Basile Morin",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Swimming_pool_and_terrasse_of_Amantaka_luxury_Resort_%26_Hotel_in_Luang_Prabang_Laos.jpg"
+    },
+    {
+      "file": "03.jpg",
+      "sourceTitle": "File:Swimming pool and main building of Amantaka luxury Resort & Hotel in Luang Prabang Laos.jpg",
+      "artist": "Basile Morin",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Swimming_pool_and_main_building_of_Amantaka_luxury_Resort_%26_Hotel_in_Luang_Prabang_Laos.jpg"
+    },
+    {
+      "file": "04.jpg",
+      "sourceTitle": "File:Ideal Beach Resort Pool Mahabalipuram Sep22 R16 06310.jpg",
+      "artist": "Timothy A. Gonsalves",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ideal_Beach_Resort_Pool_Mahabalipuram_Sep22_R16_06310.jpg"
+    },
+    {
+      "file": "05.jpg",
+      "sourceTitle": "File:Swimming pool, Resort Das Achental, Grassau, 2023.jpg",
+      "artist": "DimiTalen",
+      "license": "CC0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Swimming_pool,_Resort_Das_Achental,_Grassau,_2023.jpg"
+    },
+    {
+      "file": "06.jpg",
+      "sourceTitle": "File:Swimming pool at Noosa North Shore Resort, Queensland.jpg",
+      "artist": "Kgbo",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Swimming_pool_at_Noosa_North_Shore_Resort,_Queensland.jpg"
+    },
+    {
+      "file": "07.jpg",
+      "sourceTitle": "File:Swimming pool at Noosa North Shore Resort, Queensland pano.jpg",
+      "artist": "Kgbo",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Swimming_pool_at_Noosa_North_Shore_Resort,_Queensland_pano.jpg"
+    },
+    {
+      "file": "08.jpg",
+      "sourceTitle": "File:Olympic-sized Swimming Pool and Piscine for Kids Eden Roc Resort Hotel Rhodes 24 July 2016.jpg",
+      "artist": "Pjotr Mahhonin",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Olympic-sized_Swimming_Pool_and_Piscine_for_Kids_Eden_Roc_Resort_Hotel_Rhodes_24_July_2016.jpg"
+    },
+    {
+      "file": "09.jpg",
+      "sourceTitle": "File:Uxmal, Yucatan, Mexico - Swimming pool, Uxmal Resort Maya 2021.jpg",
+      "artist": "Sharon Hahn Darlin",
+      "license": "CC BY 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Uxmal,_Yucatan,_Mexico_-_Swimming_pool,_Uxmal_Resort_Maya_2021.jpg"
+    }
+  ],
+  "club-rankings": [
+    {
+      "file": "01.jpg",
+      "sourceTitle": "File:DZ6 2425 Sunlight filters through palm trees onto a peaceful green park at golden hour.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2425_Sunlight_filters_through_palm_trees_onto_a_peaceful_green_park_at_golden_hour.jpg"
+    },
+    {
+      "file": "02.jpg",
+      "sourceTitle": "File:Establishing El Gouna (2014).jpeg",
+      "artist": "NASA Earth Observatory (Jesse Allen and Adam Voiland)",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Establishing_El_Gouna_(2014).jpeg"
+    },
+    {
+      "file": "03.jpg",
+      "sourceTitle": "File:DZ6 2432 Sunlit morning on the fairway - golf carts waiting as players tee off under swaying palm trees.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2432_Sunlit_morning_on_the_fairway_-_golf_carts_waiting_as_players_tee_off_under_swaying_palm_trees.jpg"
+    },
+    {
+      "file": "04.jpg",
+      "sourceTitle": "File:DZ6 2476 Sunlight dappling the fairway as a peaceful morning stroll winds through the trees on the golf course.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2476_Sunlight_dappling_the_fairway_as_a_peaceful_morning_stroll_winds_through_the_trees_on_the_golf_course.jpg"
+    },
+    {
+      "file": "05.jpg",
+      "sourceTitle": "File:DZ6 2440 A golfer steps out of a cart onto a sunlit fairway ready for a peaceful round amid rolling greens and distant hills.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2440_A_golfer_steps_out_of_a_cart_onto_a_sunlit_fairway_ready_for_a_peaceful_round_amid_rolling_greens_and_distant_hills.jpg"
+    },
+    {
+      "file": "06.jpg",
+      "sourceTitle": "File:DZ6 2495 Sunny day on the green - golfers relax between holes as a cart waits on the path.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2495_Sunny_day_on_the_green_-_golfers_relax_between_holes_as_a_cart_waits_on_the_path.jpg"
+    },
+    {
+      "file": "07.jpg",
+      "sourceTitle": "File:DZ6 2469 Golden afternoon on the golf course sunlight washes over manicured greens and a peaceful pavilion.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2469_Golden_afternoon_on_the_golf_course_sunlight_washes_over_manicured_greens_and_a_peaceful_pavilion.jpg"
+    },
+    {
+      "file": "08.jpg",
+      "sourceTitle": "File:DZ6 2492 Sunny day on the golf course carts lined up by the path as players enjoy a round under blue skies.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2492_Sunny_day_on_the_golf_course_carts_lined_up_by_the_path_as_players_enjoy_a_round_under_blue_skies.jpg"
+    },
+    {
+      "file": "09.jpg",
+      "sourceTitle": "File:DZ6 2438 Sunrise drive over the water - taking aim on the perfect tee shot.jpg",
+      "artist": "PattayaPatrol",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:DZ6_2438_Sunrise_drive_over_the_water_-_taking_aim_on_the_perfect_tee_shot.jpg"
+    }
+  ],
+  "podcasts": [
+    {
+      "file": "01.jpg",
+      "sourceTitle": "File:Microphone in SPNN Podcast studio.jpg",
+      "artist": "Myotus",
+      "license": "CC BY 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Microphone_in_SPNN_Podcast_studio.jpg"
+    },
+    {
+      "file": "02.jpg",
+      "sourceTitle": "File:Microphones in SPNN Podcast studio-01.jpg",
+      "artist": "Myotus",
+      "license": "CC BY 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Microphones_in_SPNN_Podcast_studio-01.jpg"
+    },
+    {
+      "file": "03.jpg",
+      "sourceTitle": "File:Microphones in SPNN Podcast studio.jpg",
+      "artist": "Myotus",
+      "license": "CC BY 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Microphones_in_SPNN_Podcast_studio.jpg"
+    },
+    {
+      "file": "04.jpg",
+      "sourceTitle": "File:The Podcave home studio update (179160280).jpg",
+      "artist": "Tim Wilson",
+      "license": "CC BY 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Podcave_home_studio_update_(179160280).jpg"
+    },
+    {
+      "file": "05.jpg",
+      "sourceTitle": "File:Adobe Connect Webinar & Podcast setting.jpg",
+      "artist": "Stephan Ridgway from Sydney, Australia",
+      "license": "CC BY 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Adobe_Connect_Webinar_%26_Podcast_setting.jpg"
+    },
+    {
+      "file": "06.jpg",
+      "sourceTitle": "File:Historian and scholar Jon Wiener on his podcast Start Making Sense with guest Green Party candidate Jill Stein.jpg",
+      "artist": "Jon Wiener is the copyright owner and gives permission.",
+      "license": "CC BY-SA 3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Historian_and_scholar_Jon_Wiener_on_his_podcast_Start_Making_Sense_with_guest_Green_Party_candidate_Jill_Stein.jpg"
+    },
+    {
+      "file": "07.jpg",
+      "sourceTitle": "File:Podcasting-wcwc.jpg",
+      "artist": "JKizzieHumanities",
+      "license": "CC BY-SA 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Podcasting-wcwc.jpg"
+    },
+    {
+      "file": "08.jpg",
+      "sourceTitle": "File:Resource Development Kits for the ANT Project (1).jpg",
+      "artist": "Stephan Ridgway from Sydney, Australia",
+      "license": "CC BY 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Resource_Development_Kits_for_the_ANT_Project_(1).jpg"
+    },
+    {
+      "file": "09.jpg",
+      "sourceTitle": "File:The Podcave (76894378).jpg",
+      "artist": "Tim Wilson from Blaine, MN, USA",
+      "license": "CC BY 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Podcave_(76894378).jpg"
+    }
+  ],
+  "clubopspro": [
+    {
+      "file": "01.jpg",
+      "sourceTitle": "File:University of Worcester - Worcester Business School - Infirmary Walk, Worcester (20280455330).jpg",
+      "artist": "Elliott Brown from Birmingham, United Kingdom",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:University_of_Worcester_-_Worcester_Business_School_-_Infirmary_Walk,_Worcester_(20280455330).jpg"
+    },
+    {
+      "file": "02.jpg",
+      "sourceTitle": "File:University of Worcester - Worcester Business School - Castle Street, Worcester (20281824599).jpg",
+      "artist": "Elliott Brown from Birmingham, United Kingdom",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:University_of_Worcester_-_Worcester_Business_School_-_Castle_Street,_Worcester_(20281824599).jpg"
+    },
+    {
+      "file": "03.jpg",
+      "sourceTitle": "File:University of Worcester - Worcester Business School - Infirmary Walk, Worcester (19847629943).jpg",
+      "artist": "Elliott Brown from Birmingham, United Kingdom",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:University_of_Worcester_-_Worcester_Business_School_-_Infirmary_Walk,_Worcester_(19847629943).jpg"
+    },
+    {
+      "file": "04.jpg",
+      "sourceTitle": "File:University of Worcester - Worcester Business School - Castle Street, Worcester (20281815619).jpg",
+      "artist": "Elliott Brown from Birmingham, United Kingdom",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:University_of_Worcester_-_Worcester_Business_School_-_Castle_Street,_Worcester_(20281815619).jpg"
+    },
+    {
+      "file": "05.jpg",
+      "sourceTitle": "File:University of Worcester - Worcester Business School - Infirmary Walk, Worcester (19845944784).jpg",
+      "artist": "Elliott Brown from Birmingham, United Kingdom",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:University_of_Worcester_-_Worcester_Business_School_-_Infirmary_Walk,_Worcester_(19845944784).jpg"
+    },
+    {
+      "file": "06.jpg",
+      "sourceTitle": "File:Hans-Paul Buerkner - World Economic Forum Annual Meeting 2012.jpg",
+      "artist": "World Economic Forum",
+      "license": "CC BY-SA 2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hans-Paul_Buerkner_-_World_Economic_Forum_Annual_Meeting_2012.jpg"
+    },
+    {
+      "file": "07.jpg",
+      "sourceTitle": "File:Assignment- 48-DPA-04-25-08 SOI K Abraham) Secretary Dirk Kempthorne, (Assistant Secretary for Land and Minerals Management C. Stephen Allred meeting at Main Interior) with group le - DPLA - c24835c319529881dd05e84f0b99cb86.jpg",
+      "artist": "U.S. Department of the Interior",
+      "license": "Public domain",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Assignment-_48-DPA-04-25-08_SOI_K_Abraham)_Secretary_Dirk_Kempthorne,_(Assistant_Secretary_for_Land_and_Minerals_Management_C._Stephen_Allred_meeting_at_Main_Interior)_with_group_le_-_DPLA_-_c24835c319529881dd05e84f0b99cb86.jpg"
+    },
+    {
+      "file": "08.jpg",
+      "sourceTitle": "File:Reuven Rivlin in a meeting of \u00abLeadership and Disability\u00bb, January 2018 (2634).jpg",
+      "artist": "Haim Zach",
+      "license": "CC BY-SA 3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Reuven_Rivlin_in_a_meeting_of_%C2%ABLeadership_and_Disability%C2%BB,_January_2018_(2634).jpg"
+    },
+    {
+      "file": "09.jpg",
+      "sourceTitle": "File:Reuven Rivlin in a meeting of \u00abLeadership and Disability\u00bb, January 2018 (2641).jpg",
+      "artist": "Haim Zach",
+      "license": "CC BY-SA 3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Reuven_Rivlin_in_a_meeting_of_%C2%ABLeadership_and_Disability%C2%BB,_January_2018_(2641).jpg"
+    }
+  ]
+}

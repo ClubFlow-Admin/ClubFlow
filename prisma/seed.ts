@@ -1,5 +1,5 @@
 import { ArticleStatus, NewsletterFrequency, PrismaClient } from "@prisma/client";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 
 function loadLocalEnv() {
   if (!existsSync(".env")) return;
@@ -210,22 +210,48 @@ const MEDIA_BUCKETS: { key: string; label: string }[] = [
   { key: "podcasts", label: "Podcasts" },
   { key: "clubopspro", label: "ClubOpsPro" }
 ];
-const IMAGES_PER_MEDIA_BUCKET = 9;
-const DEMO_MEDIA_CREDIT = "ClubFlow demo photography — procedurally generated placeholder artwork, not a real photograph";
+const DEMO_MEDIA_DIR = "public/images/demo";
+type ManifestEntry = { file: string; sourceTitle?: string; artist?: string; license?: string; sourceUrl?: string };
 
+function loadManifest(): Record<string, ManifestEntry[]> {
+  const manifestPath = `${DEMO_MEDIA_DIR}/manifest.json`;
+  if (!existsSync(manifestPath)) return {};
+  try {
+    return JSON.parse(readFileSync(manifestPath, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Builds the demo MediaAsset seed by scanning public/images/demo/<bucket>/ for image files —
+ * dropping a new licensed photo into one of those folders (any name, jpg/jpeg/png/webp) and
+ * re-running `npm run seed` picks it up automatically, with no code change required. Credit
+ * comes from manifest.json (written by scripts/fetch-demo-photos.mjs) when available, falling
+ * back to a generic "ClubFlow demo photography" label for any manually dropped-in file.
+ */
 function buildDemoMediaSeed() {
-  return MEDIA_BUCKETS.flatMap(({ key, label }) =>
-    Array.from({ length: IMAGES_PER_MEDIA_BUCKET }, (_, index) => {
+  const manifest = loadManifest();
+  const seed: { title: string; url: string; altText: string; category: string; credit: string }[] = [];
+  for (const { key, label } of MEDIA_BUCKETS) {
+    const dir = `${DEMO_MEDIA_DIR}/${key}`;
+    if (!existsSync(dir)) continue;
+    const files = readdirSync(dir).filter((file) => /\.(jpe?g|png|webp)$/i.test(file)).sort();
+    const manifestByFile = new Map((manifest[key] ?? []).map((entry) => [entry.file, entry]));
+    files.forEach((file, index) => {
       const n = String(index + 1).padStart(2, "0");
-      return {
+      const entry = manifestByFile.get(file);
+      const credit = entry?.artist && entry?.license ? `Photo: ${entry.artist} (${entry.license} via Wikimedia Commons)` : "ClubFlow demo photography — placeholder pending licensed replacement";
+      seed.push({
         title: `${label} Demo Photo ${n}`,
-        url: `/images/demo/${key}-${n}.svg`,
+        url: `/images/demo/${key}/${file}`,
         altText: `${label} — demo editorial photography ${n}`,
         category: key,
-        credit: DEMO_MEDIA_CREDIT
-      };
-    })
-  );
+        credit
+      });
+    });
+  }
+  return seed;
 }
 
 async function main() {
@@ -250,23 +276,35 @@ async function main() {
     bucket.push(record);
     mediaByBucket.set(record.category, bucket);
   }
-  // Round-robins through each category's 9 demo images in seed order so consecutive
-  // articles in the same category never repeat the same hero image.
-  const bucketCursor = new Map<string, number>();
-  function nextHeroImageIdFor(categorySlug: string) {
-    const bucketKey = CATEGORY_SLUG_TO_MEDIA_BUCKET[categorySlug] ?? "industry";
-    const bucket = mediaByBucket.get(bucketKey);
-    if (!bucket || !bucket.length) return null;
-    const cursor = bucketCursor.get(bucketKey) ?? 0;
-    bucketCursor.set(bucketKey, cursor + 1);
-    return bucket[cursor % bucket.length].id;
-  }
-
   for (const [index, item] of stories.entries()) {
     const slug = slugify(item.title);
     const sourceName = item.source ?? (item.category === "technology" ? "Hospitality Tech Ledger" : item.category === "developments-renovations" ? "Resort & Club Design" : "ClubFlow Intelligence Desk");
-    const data = { title: item.title, slug, author: "ClubFlow Research", publishedAt: new Date(Date.UTC(2026, 5, 20 - (index % 17), 13)), tags: [item.category, "demo intelligence"], clubName: item.club ?? null, city: item.city ?? null, state: item.state ?? null, originalExcerpt: item.summary, aiSummary: item.summary, importanceScore: item.score ?? 72 + (index % 17), status: ArticleStatus.published, sourceId: sourceByName[sourceName].id, categoryId: categoryBySlug[item.category].id, heroImageId: nextHeroImageIdFor(item.category) };
+    const data = { title: item.title, slug, author: "ClubFlow Research", publishedAt: new Date(Date.UTC(2026, 5, 20 - (index % 17), 13)), tags: [item.category, "demo intelligence"], clubName: item.club ?? null, city: item.city ?? null, state: item.state ?? null, originalExcerpt: item.summary, aiSummary: item.summary, importanceScore: item.score ?? 72 + (index % 17), status: ArticleStatus.published, sourceId: sourceByName[sourceName].id, categoryId: categoryBySlug[item.category].id };
     await prisma.article.upsert({ where: { originalUrl: `https://example.com/demo/${slug}` }, update: data, create: { ...data, originalUrl: `https://example.com/demo/${slug}` } });
+  }
+
+  // Final hero-image reconciliation pass: covers every published article (including any
+  // legacy/orphaned rows from past seed runs whose titles no longer match `stories` above, which
+  // a per-story-loop assignment would silently miss) and assigns a round-robin pick from that
+  // article's category bucket, ordered by creation time for a stable, reproducible result across
+  // re-seeds. Every article in a category gets a different image as long as the category has no
+  // more articles than the bucket has images (currently 9 per bucket) — only once a category
+  // exceeds that does the rotation wrap around and repeat.
+  const allPublished = await prisma.article.findMany({ where: { status: ArticleStatus.published }, select: { id: true, categoryId: true }, orderBy: { createdAt: "asc" } });
+  const categorySlugById = Object.fromEntries(categoryRecords.map((record) => [record.id, record.slug]));
+  const publishedByCategory = new Map<string, { id: string }[]>();
+  for (const article of allPublished) {
+    const list = publishedByCategory.get(article.categoryId) ?? [];
+    list.push(article);
+    publishedByCategory.set(article.categoryId, list);
+  }
+  for (const [categoryId, articlesInCategory] of publishedByCategory) {
+    const bucketKey = CATEGORY_SLUG_TO_MEDIA_BUCKET[categorySlugById[categoryId]] ?? "industry";
+    const bucket = mediaByBucket.get(bucketKey);
+    if (!bucket || !bucket.length) continue;
+    await Promise.all(
+      articlesInCategory.map((article, index) => prisma.article.update({ where: { id: article.id }, data: { heroImageId: bucket[index % bucket.length].id } }))
+    );
   }
 
   for (const [title, clubName, city, state, description] of jobs) await prisma.jobPosting.upsert({ where: { title_clubName: { title, clubName } }, update: { city, state, description, status: ArticleStatus.published, url: `https://example.com/jobs/${slugify(`${clubName}-${title}`)}` }, create: { title, clubName, city, state, description, status: ArticleStatus.published, url: `https://example.com/jobs/${slugify(`${clubName}-${title}`)}` } });
