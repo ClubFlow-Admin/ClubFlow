@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { SectionArticleCard } from "@/components/article-card";
 import { NewsletterForm } from "@/components/newsletter-form";
 import type { ArticleWithRelations } from "@/lib/articles";
-import { imageForArticle } from "@/lib/images";
+import { imageForArticle, resolveArticleImages } from "@/lib/images";
 import { impactAreasForTags } from "@/lib/impact";
 import { estimateReadingMinutes, formatLocation, isValidExternalSourceUrl } from "@/lib/utils";
 
@@ -40,6 +40,8 @@ export function ArticleBriefing({
   const whatHappenedParagraphs = whatHappened ? whatHappened.split(/\n+/).map((p) => p.trim()).filter(Boolean) : [];
   const pullQuote = keyTakeaways.length && whatHappenedParagraphs.length > 1 ? keyTakeaways[0] : null;
   const hasEntities = Boolean(article.companies.length || article.clubs.length || article.people.length);
+  const heroImage = imageForArticle(article, 1440, 960);
+  const relatedImages = resolveArticleImages(related, 900, 600);
 
   const tocItems = [
     { id: "executive-summary", label: "Executive summary" },
@@ -74,7 +76,8 @@ export function ArticleBriefing({
 
       <div className="container-shell grid gap-12 py-12 sm:py-16 lg:grid-cols-[minmax(0,720px)_280px] lg:justify-center lg:gap-14">
         <div className="mx-auto w-full max-w-[720px]">
-          <div className="relative h-[280px] overflow-hidden rounded-md border shadow-lg sm:h-[460px]"><Image src={imageForArticle(article)} alt="" fill priority unoptimized sizes="(min-width:1024px) 720px, 100vw" className="object-cover" /></div>
+          <div className="relative h-[280px] overflow-hidden rounded-md border shadow-lg sm:h-[460px]"><Image src={heroImage.src} alt={heroImage.alt} fill priority unoptimized sizes="(min-width:1024px) 720px, 100vw" className="object-cover" /></div>
+          {heroImage.credit ? <p className="mt-2 text-right text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{heroImage.credit}</p> : null}
 
           <div className="article-prose mt-14">
             <section id="executive-summary">
@@ -202,7 +205,7 @@ export function ArticleBriefing({
       </div>
     </article>
 
-    {related.length ? <section className="border-y bg-white"><div className="container-shell py-12"><div className="section-rule"><div><div className="kicker">Continue the briefing</div><h2 className="font-serif mt-1 text-3xl font-black">Related stories</h2></div><Link href={sectionHref} className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-primary no-underline">Back to desk <ArrowRight className="h-3.5 w-3.5" /></Link></div><div className="mt-6 grid gap-4 md:grid-cols-3">{related.map((item) => <SectionArticleCard key={item.id} article={item} />)}</div></div></section> : null}
+    {related.length ? <section className="border-y bg-white"><div className="container-shell py-12"><div className="section-rule"><div><div className="kicker">Continue the briefing</div><h2 className="font-serif mt-1 text-3xl font-black">Related stories</h2></div><Link href={sectionHref} className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-primary no-underline">Back to desk <ArrowRight className="h-3.5 w-3.5" /></Link></div><div className="mt-6 grid gap-4 md:grid-cols-3">{relatedImages.map(({ article: item, ...image }) => <SectionArticleCard key={item.id} article={item} image={image} />)}</div></div></section> : null}
     <section className="container-shell py-12"><div className="grid gap-6 bg-primary p-6 text-white sm:p-8 lg:grid-cols-[1fr_420px] lg:items-center"><div><div className="text-xs font-black uppercase tracking-[.15em] text-emerald-200">The ClubFlow briefing</div><h2 className="font-serif mt-2 text-3xl font-black">Get the private club industry brief in your inbox.</h2><p className="mt-2 text-sm leading-6 text-white/70">The week&apos;s leadership moves, capital projects, developments, jobs, and operating intelligence.</p></div><NewsletterForm /></div></section>
   </main>;
 }

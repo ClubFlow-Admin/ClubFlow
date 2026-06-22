@@ -5,6 +5,7 @@ import { CompactArticleRow, FeaturedArticleCard, SectionArticleCard } from "@/co
 import { FilterBar } from "@/components/filter-bar";
 import { categoryNav } from "@/lib/categories";
 import { getArticles, getCategories, getSources } from "@/lib/articles";
+import { resolveArticleImages } from "@/lib/images";
 
 type SectionFeedPageProps = { title: string; eyebrow: string; description: string; href: string; categorySlug: string; searchParams: Record<string, string | undefined> };
 
@@ -17,6 +18,7 @@ export async function SectionFeedPage({ title, eyebrow, description, href, categ
   const featured = articles[0];
   const latest = articles.slice(1, 5);
   const archive = articles.slice(5);
+  const archiveImages = resolveArticleImages(archive, 900, 600);
   const lastUpdated = articles[0]?.publishedAt;
 
   return <main>
@@ -43,7 +45,7 @@ export async function SectionFeedPage({ title, eyebrow, description, href, categ
         </div>
       )}
 
-      {archive.length ? <section className="mt-12"><div className="section-rule"><div><div className="kicker">Desk archive</div><h2 className="font-serif mt-1 text-3xl font-black">More intelligence</h2></div><span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Newest first</span></div><div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{archive.map((article)=><SectionArticleCard key={article.id} article={article} />)}</div></section> : null}
+      {archive.length ? <section className="mt-12"><div className="section-rule"><div><div className="kicker">Desk archive</div><h2 className="font-serif mt-1 text-3xl font-black">More intelligence</h2></div><span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Newest first</span></div><div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{archiveImages.map(({ article, ...image })=><SectionArticleCard key={article.id} article={article} image={image} />)}</div></section> : null}
     </section>
   </main>;
 }

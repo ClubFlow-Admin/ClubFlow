@@ -4,6 +4,7 @@ import { ArrowRight, BarChart3, BriefcaseBusiness, Check, Flame, Newspaper, Trop
 import { CompactArticleRow, FeaturedArticleCard, SectionArticleCard } from "@/components/article-card";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { getArticles } from "@/lib/articles";
+import { resolveArticleImages } from "@/lib/images";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,8 @@ export default async function HomePage() {
   const featuredExecutiveStory = byCategory("executive-moves", 1)[0];
   const featuredDevelopmentStory = developments[0];
   const featuredCapitalStory = capital[0];
+  const secondaryImages = resolveArticleImages(secondary, 900, 600);
+  const technologyCardImages = resolveArticleImages(technology.slice(0, 2), 900, 600);
 
   return <main>
     <section className="relative overflow-hidden bg-ink text-white">
@@ -59,7 +62,7 @@ export default async function HomePage() {
     <section className="container-shell py-10 sm:py-12">
       <SectionHeading eyebrow="Lead intelligence" title="What club leaders need to know now" href="/industry" />
       {topStory ? <div className="mt-6"><FeaturedArticleCard article={topStory} priority /></div> : null}
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_1fr_.9fr]">{secondary.map((article)=><SectionArticleCard key={article.id} article={article} />)}<div className="border bg-muted/35 px-5"><div className="border-b py-4 text-xs font-black uppercase tracking-[.14em] text-primary">Also on the wire</div>{headlines.map((article)=><CompactArticleRow key={article.id} article={article} />)}</div></div>
+      <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_1fr_.9fr]">{secondaryImages.map(({ article, ...image })=><SectionArticleCard key={article.id} article={article} image={image} />)}<div className="border bg-muted/35 px-5"><div className="border-b py-4 text-xs font-black uppercase tracking-[.14em] text-primary">Also on the wire</div>{headlines.map((article)=><CompactArticleRow key={article.id} article={article} />)}</div></div>
     </section>
 
     {trending.length ? <section className="border-y bg-white"><div className="container-shell py-10 sm:py-12"><div className="section-rule"><div><div className="kicker">Trending now</div><h2 className="font-serif mt-1 text-3xl font-black">Most relevant to club leaders this week</h2></div></div><div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">{trending.map((article,index)=><div key={article.id} className="card-lift relative border bg-white p-4"><span className="number-tabular absolute -top-3 left-4 flex h-7 w-7 items-center justify-center rounded-full bg-ink text-sm font-black text-white">{index+1}</span><Link href={`/articles/${article.slug}`} className="no-underline"><div className="mt-3 text-[10px] font-black uppercase tracking-[.1em] text-primary">{article.category.name}</div><h3 className="font-serif mt-2 text-base font-black leading-snug">{article.title}</h3></Link></div>)}</div></div></section> : null}
@@ -77,7 +80,7 @@ export default async function HomePage() {
 
     <section className="container-shell grid gap-10 py-10 sm:py-12 lg:grid-cols-2">
       <div><SectionHeading eyebrow="Capital monitor" title="Investment & Capital Projects" href="/capital-investments" /> <div className="mt-5 border-t">{capital.map((article)=><CompactArticleRow key={article.id} article={article} />)}</div></div>
-      <div><SectionHeading eyebrow="Systems & data" title="Technology Watch" href="/technology" /><div className="mt-5 grid gap-4 sm:grid-cols-2">{technology.slice(0,2).map((article)=><SectionArticleCard key={article.id} article={article} />)}</div>{technology[2]?<div className="mt-1"><CompactArticleRow article={technology[2]} /></div>:null}</div>
+      <div><SectionHeading eyebrow="Systems & data" title="Technology Watch" href="/technology" /><div className="mt-5 grid gap-4 sm:grid-cols-2">{technologyCardImages.map(({ article, ...image })=><SectionArticleCard key={article.id} article={article} image={image} />)}</div>{technology[2]?<div className="mt-1"><CompactArticleRow article={technology[2]} /></div>:null}</div>
     </section>
 
     <section className="bg-ink text-white"><div className="container-shell grid gap-8 py-10 sm:py-12 lg:grid-cols-[.75fr_1.25fr]"><div><div className="text-xs font-black uppercase tracking-[.16em] text-emerald-300">Transaction intelligence</div><h2 className="font-serif mt-2 text-3xl font-black">Golf & Club Deal Desk</h2><p className="mt-3 text-sm leading-6 text-white/55">Ownership changes, portfolio activity, management agreements, and capital entering the private-club market.</p><MoreLink href="/mergers-acquisitions" label="Open the deal desk" inverse /></div><div className="grid gap-x-7 sm:grid-cols-2">{deals.map((article)=><CompactArticleRow key={article.id} article={article} inverse />)}</div></div></section>

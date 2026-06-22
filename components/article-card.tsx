@@ -3,7 +3,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { ArrowRight, Clock, MapPin } from "lucide-react";
 import type { ArticleWithRelations } from "@/lib/articles";
-import { imageForArticle } from "@/lib/images";
+import { imageForArticle, type ResolvedImage } from "@/lib/images";
 import { estimateReadingMinutes, formatLocation } from "@/lib/utils";
 
 function readingMinutesFor(article: ArticleWithRelations) {
@@ -31,12 +31,13 @@ function StoryMeta({ article, inverse = false }: { article: ArticleWithRelations
   );
 }
 
-export function FeaturedArticleCard({ article, priority = false }: { article: ArticleWithRelations; priority?: boolean }) {
+export function FeaturedArticleCard({ article, priority = false, image }: { article: ArticleWithRelations; priority?: boolean; image?: ResolvedImage }) {
   const location = formatLocation(article.city, article.state);
+  const resolved = image ?? imageForArticle(article, 1400, 1000);
   return (
     <article className="card-lift group grid overflow-hidden border bg-white lg:grid-cols-[1.08fr_.92fr]">
       <Link href={`/articles/${article.slug}`} className="relative block min-h-[280px] overflow-hidden no-underline sm:min-h-[400px]">
-        <Image src={imageForArticle(article)} alt="" fill priority={priority} unoptimized sizes="(min-width:1024px) 52vw, 100vw" className="object-cover transition duration-700 ease-out group-hover:scale-[1.04]" />
+        <Image src={resolved.src} alt={resolved.alt} fill priority={priority} unoptimized sizes="(min-width:1024px) 52vw, 100vw" className="object-cover transition duration-700 ease-out group-hover:scale-[1.04]" />
         <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute left-4 top-4"><CategoryBadge name={article.category.name} inverse /></div>
       </Link>
@@ -65,12 +66,13 @@ export function CompactArticleRow({ article, showCategory = true, inverse = fals
   );
 }
 
-export function SectionArticleCard({ article }: { article: ArticleWithRelations }) {
+export function SectionArticleCard({ article, image }: { article: ArticleWithRelations; image?: ResolvedImage }) {
   const location = formatLocation(article.city, article.state);
+  const resolved = image ?? imageForArticle(article, 900, 600);
   return (
     <article className="card-lift group flex h-full flex-col overflow-hidden border bg-white">
       <Link href={`/articles/${article.slug}`} className="relative block h-44 overflow-hidden no-underline">
-        <Image src={imageForArticle(article)} alt="" fill unoptimized sizes="(min-width:1024px) 33vw, 100vw" className="object-cover transition duration-500 ease-out group-hover:scale-[1.05]" />
+        <Image src={resolved.src} alt={resolved.alt} fill unoptimized sizes="(min-width:1024px) 33vw, 100vw" className="object-cover transition duration-500 ease-out group-hover:scale-[1.05]" />
         <div className="absolute left-3 top-3"><CategoryBadge name={article.category.name} inverse /></div>
       </Link>
       <div className="flex flex-1 flex-col p-5 sm:p-6">

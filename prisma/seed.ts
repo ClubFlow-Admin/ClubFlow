@@ -194,7 +194,7 @@ async function main() {
     ["Clubhouse Terrace", "/images/clubhouse-hero.png", "Private club clubhouse terrace at golden hour", "hero"],
     ["Renovation Planning", "/images/renovation-planning.png", "Private club renovation materials on a conference table", "renovation"],
     ["Club Technology Dashboard", "/images/club-tech-dashboard.png", "Private club operations technology dashboard", "technology"]
-  ].map(([title, url, altText, category]) => prisma.mediaAsset.upsert({ where: { url }, update: { title, altText, category }, create: { title, url, altText, category } })));
+  ].map(([title, url, altText, category]) => prisma.mediaAsset.upsert({ where: { url }, update: { title, altText, category, credit: "ClubFlow original photography" }, create: { title, url, altText, category, credit: "ClubFlow original photography" } })));
   const imageByCategory = { hero: media[0].id, "industry-news": media[0].id, "developments-renovations": media[1].id, "capital-investments": media[1].id, technology: media[2].id, "mergers-acquisitions": media[0].id } as Record<string, string>;
 
   for (const [index, item] of stories.entries()) {
