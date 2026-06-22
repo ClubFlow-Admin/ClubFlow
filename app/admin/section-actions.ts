@@ -41,28 +41,58 @@ function refresh(sectionSlug: string, publicHref: string) {
   revalidatePath("/"); revalidatePath(publicHref); revalidatePath(`/admin/${sectionSlug}`); revalidatePath("/admin");
 }
 
+type ArticleSection = Extract<ReturnType<typeof sectionOrThrow>, { kind: "article" }>;
+
+async function createArticle(section: ArticleSection, formData: FormData) {
+  const raw = Object.fromEntries(formData.entries());
+  const parsed = articleSchema.parse(raw);
+  const category = await prisma.category.findUnique({ where: { slug: section.categorySlug } });
+  if (!category) throw new Error(`Missing locked category: ${section.categorySlug}`);
+  const aiKeyTakeaways = formData.getAll("aiKeyTakeaways").map(String).map((item) => item.trim()).filter(Boolean);
+  const entities = entityRelationsFromForm(formData);
+  return prisma.article.create({
+    data: {
+      ...parsed,
+      slug: slugify(parsed.title),
+      publishedAt: new Date(parsed.publishedAt),
+      tags: parsed.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? [],
+      categoryId: category.id,
+      aiKeyTakeaways,
+      clubs: entities.clubs.length ? { connect: entities.clubs.map((id) => ({ id })) } : undefined,
+      companies: entities.companies.length ? { connect: entities.companies.map((id) => ({ id })) } : undefined,
+      people: entities.people.length ? { connect: entities.people.map((id) => ({ id })) } : undefined
+    }
+  });
+}
+
+async function updateArticle(section: ArticleSection, id: string, formData: FormData) {
+  const raw = Object.fromEntries(formData.entries());
+  const parsed = articleSchema.parse(raw);
+  const category = await prisma.category.findUnique({ where: { slug: section.categorySlug } });
+  if (!category) throw new Error(`Missing locked category: ${section.categorySlug}`);
+  const aiKeyTakeaways = formData.getAll("aiKeyTakeaways").map(String).map((item) => item.trim()).filter(Boolean);
+  const entities = entityRelationsFromForm(formData);
+  return prisma.article.update({
+    where: { id },
+    data: {
+      ...parsed,
+      slug: slugify(parsed.title),
+      publishedAt: new Date(parsed.publishedAt),
+      tags: parsed.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? [],
+      categoryId: category.id,
+      aiKeyTakeaways,
+      clubs: { set: entities.clubs.map((entityId) => ({ id: entityId })) },
+      companies: { set: entities.companies.map((entityId) => ({ id: entityId })) },
+      people: { set: entities.people.map((entityId) => ({ id: entityId })) }
+    }
+  });
+}
+
 export async function createSectionContent(sectionSlug: string, formData: FormData) {
   const section = sectionOrThrow(sectionSlug);
   const raw = Object.fromEntries(formData.entries());
   if (section.kind === "article") {
-    const parsed = articleSchema.parse(raw);
-    const category = await prisma.category.findUnique({ where: { slug: section.categorySlug } });
-    if (!category) throw new Error(`Missing locked category: ${section.categorySlug}`);
-    const aiKeyTakeaways = formData.getAll("aiKeyTakeaways").map(String).map((item) => item.trim()).filter(Boolean);
-    const entities = entityRelationsFromForm(formData);
-    await prisma.article.create({
-      data: {
-        ...parsed,
-        slug: slugify(parsed.title),
-        publishedAt: new Date(parsed.publishedAt),
-        tags: parsed.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? [],
-        categoryId: category.id,
-        aiKeyTakeaways,
-        clubs: entities.clubs.length ? { connect: entities.clubs.map((id) => ({ id })) } : undefined,
-        companies: entities.companies.length ? { connect: entities.companies.map((id) => ({ id })) } : undefined,
-        people: entities.people.length ? { connect: entities.people.map((id) => ({ id })) } : undefined
-      }
-    });
+    await createArticle(section, formData);
   } else if (section.kind === "job") {
     const parsed = jobSchema.parse(raw);
     await prisma.jobPosting.create({ data: { ...parsed, postedAt: new Date(parsed.postedAt), expiresAt: dateOrNull(parsed.expiresAt) } });
@@ -79,29 +109,20 @@ export async function createSectionContent(sectionSlug: string, formData: FormDa
   redirect(`/admin/${sectionSlug}`);
 }
 
+/** Same as createSectionContent, but stays in the editor (article sections only) instead of returning to the list. */
+export async function createSectionContentAndContinue(sectionSlug: string, formData: FormData) {
+  const section = sectionOrThrow(sectionSlug);
+  if (section.kind !== "article") throw new Error("Save & continue is only supported for article sections.");
+  const created = await createArticle(section, formData);
+  refresh(sectionSlug, section.publicHref);
+  redirect(`/admin/${sectionSlug}/${created.id}/edit?saved=1`);
+}
+
 export async function updateSectionContent(sectionSlug: string, id: string, formData: FormData) {
   const section = sectionOrThrow(sectionSlug);
   const raw = Object.fromEntries(formData.entries());
   if (section.kind === "article") {
-    const parsed = articleSchema.parse(raw);
-    const category = await prisma.category.findUnique({ where: { slug: section.categorySlug } });
-    if (!category) throw new Error(`Missing locked category: ${section.categorySlug}`);
-    const aiKeyTakeaways = formData.getAll("aiKeyTakeaways").map(String).map((item) => item.trim()).filter(Boolean);
-    const entities = entityRelationsFromForm(formData);
-    await prisma.article.update({
-      where: { id },
-      data: {
-        ...parsed,
-        slug: slugify(parsed.title),
-        publishedAt: new Date(parsed.publishedAt),
-        tags: parsed.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? [],
-        categoryId: category.id,
-        aiKeyTakeaways,
-        clubs: { set: entities.clubs.map((entityId) => ({ id: entityId })) },
-        companies: { set: entities.companies.map((entityId) => ({ id: entityId })) },
-        people: { set: entities.people.map((entityId) => ({ id: entityId })) }
-      }
-    });
+    await updateArticle(section, id, formData);
   } else if (section.kind === "job") {
     const parsed = jobSchema.parse(raw);
     await prisma.jobPosting.update({ where: { id }, data: { ...parsed, postedAt: new Date(parsed.postedAt), expiresAt: dateOrNull(parsed.expiresAt) } });
@@ -116,6 +137,15 @@ export async function updateSectionContent(sectionSlug: string, id: string, form
   }
   refresh(sectionSlug, section.publicHref);
   redirect(`/admin/${sectionSlug}`);
+}
+
+/** Same as updateSectionContent, but stays in the editor (article sections only) instead of returning to the list. */
+export async function updateSectionContentAndContinue(sectionSlug: string, id: string, formData: FormData) {
+  const section = sectionOrThrow(sectionSlug);
+  if (section.kind !== "article") throw new Error("Save & continue is only supported for article sections.");
+  await updateArticle(section, id, formData);
+  refresh(sectionSlug, section.publicHref);
+  redirect(`/admin/${sectionSlug}/${id}/edit?saved=1`);
 }
 
 export async function deleteSectionContent(sectionSlug: string, id: string) {

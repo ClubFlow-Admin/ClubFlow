@@ -90,3 +90,11 @@ export async function getPublishedArticleBySlug(slug: string) {
     include: { category: true, source: true, heroImage: true, clubs: true, companies: true, people: true }
   });
 }
+
+/** Admin-only lookup — returns an article regardless of status, for editor previews. */
+export async function getArticleByIdForPreview(id: string) {
+  return prisma.article.findUnique({
+    where: { id },
+    include: { category: true, source: true, heroImage: true, clubs: true, companies: true, people: true }
+  });
+}
