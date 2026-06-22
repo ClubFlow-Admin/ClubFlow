@@ -4,6 +4,7 @@ import type { ArticleStatus, Category, MediaAsset, Source } from "@prisma/client
 import { AlertTriangle, Bot, CheckCircle2, Circle, Eye, Link2, PenLine } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { ArticleWithRelations } from "@/lib/articles";
+import { importanceTier } from "@/lib/importance";
 import { estimateReadingMinutes, isValidExternalSourceUrl } from "@/lib/utils";
 import { AdminAiTextField } from "@/components/admin-ai-text-field";
 import { AdminEntityTagging } from "@/components/admin-entity-tagging";
@@ -367,7 +368,7 @@ export function AdminArticleForm({
               {mediaAssets.map((asset) => <option value={asset.id} key={asset.id}>{asset.title}</option>)}
             </select>
           </div>
-          <Field label="Importance Score" name="importanceScore" type="number" min="0" max="100" defaultValue={String(article?.importanceScore ?? 50)} required />
+          <ImportanceScoreField defaultValue={article?.importanceScore ?? 50} />
         </div>
         <div className="mt-4 grid gap-2">
           <Label htmlFor="originalExcerpt">Original RSS Excerpt</Label>
@@ -405,6 +406,28 @@ function Field({
     <div className="grid gap-2">
       <Label htmlFor={name}>{label}</Label>
       <Input id={name} name={name} {...props} />
+    </div>
+  );
+}
+
+function ImportanceScoreField({ defaultValue }: { defaultValue: number }) {
+  const [score, setScore] = useState(defaultValue);
+  return (
+    <div className="grid gap-2">
+      <Label htmlFor="importanceScore">Importance Score</Label>
+      <div className="flex items-center gap-3">
+        <Input
+          id="importanceScore"
+          name="importanceScore"
+          type="number"
+          min="0"
+          max="100"
+          value={score}
+          onChange={(event) => setScore(Number(event.target.value))}
+          required
+        />
+        <Badge>{importanceTier(score)}</Badge>
+      </div>
     </div>
   );
 }
