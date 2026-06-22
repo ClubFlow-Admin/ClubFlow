@@ -44,7 +44,7 @@ export function DailyBrief({ articles }: { articles: ArticleWithRelations[] }) {
                     <span className={`px-2 py-0.5 ${TIER_STYLE[tier]}`}>{tier}</span>
                     <span className="text-muted-foreground">{article.category.name}</span>
                   </div>
-                  <Link href={`/articles/${article.slug}`} className="no-underline">
+                  <Link href={`/articles/${article.slug}?from=home`} className="no-underline">
                     <h3 className="font-serif mt-1.5 text-lg font-black leading-snug transition hover:text-primary sm:text-xl">{article.title}</h3>
                   </Link>
                   <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{oneSentenceSummary(article)}</p>

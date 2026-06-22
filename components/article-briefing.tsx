@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { SectionArticleCard } from "@/components/article-card";
 import { NewsletterForm } from "@/components/newsletter-form";
 import type { ArticleWithRelations } from "@/lib/articles";
+import { fromKeyForHref, resolveBackLink } from "@/lib/back-link";
 import { businessImpactForArticle, businessImpactSummary } from "@/lib/business-impact";
 import { companyRoutePrefix } from "@/lib/entities";
 import { imageForArticle, resolveArticleImages } from "@/lib/images";
@@ -34,14 +35,18 @@ export function ArticleBriefing({
   related,
   relatedDesks = [],
   sectionHref,
+  from,
   banner
 }: {
   article: ArticleWithRelations;
   related: ArticleWithRelations[];
   relatedDesks?: RelatedDesk[];
   sectionHref: string;
+  from?: string;
   banner?: ReactNode;
 }) {
+  const backLink = resolveBackLink(from, { label: article.category.name, href: sectionHref });
+  const sectionFromKey = fromKeyForHref(sectionHref);
   const location = formatLocation(article.city, article.state);
   const whatHappened = article.aiWhatHappened || article.originalExcerpt;
   const whyItMatters = article.aiWhyItMatters || DEFAULT_WHY_IT_MATTERS;
@@ -74,7 +79,7 @@ export function ArticleBriefing({
     <article>
       <header className="border-b bg-white">
         <div className="container-shell py-12 sm:py-16">
-          <Link href={sectionHref} className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.09em] text-primary no-underline"><ArrowLeft className="h-3.5 w-3.5" /> Back to {article.category.name}</Link>
+          <Link href={backLink.href} className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.09em] text-primary no-underline"><ArrowLeft className="h-3.5 w-3.5" /> Back to {backLink.label}</Link>
           <div className="mx-auto mt-9 max-w-3xl">
             <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-[.11em] text-primary"><span>{article.category.name}</span><span className="text-muted-foreground">/</span><span className="text-muted-foreground">Intelligence brief</span></div>
             <h1 className="font-serif mt-5 text-balance text-4xl font-black leading-[1.05] sm:text-5xl lg:text-[3.5rem]">{article.title}</h1>
@@ -213,12 +218,13 @@ export function ArticleBriefing({
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {relatedDesks.map((desk) => {
                 const Icon = DESK_ICON[desk.slug] ?? Building2;
+                const deskFromKey = fromKeyForHref(desk.href);
                 return (
                   <div key={desk.slug} className="border bg-white p-5">
                     <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.1em] text-primary"><Icon className="h-4 w-4" />{desk.label}</div>
                     <div className="mt-3 divide-y">
                       {desk.articles.map((item) => (
-                        <Link key={item.id} href={`/articles/${item.slug}`} className="block py-2.5 no-underline first:pt-0 last:pb-0">
+                        <Link key={item.id} href={`/articles/${item.slug}?from=${deskFromKey}`} className="block py-2.5 no-underline first:pt-0 last:pb-0">
                           <h3 className="font-serif text-sm font-black leading-snug text-foreground transition hover:text-primary">{item.title}</h3>
                         </Link>
                       ))}
@@ -262,7 +268,7 @@ export function ArticleBriefing({
           {related.length ? (
             <div className="mt-8">
               <div className="kicker">Related articles</div>
-              <div className="mt-4 grid gap-4 md:grid-cols-3">{relatedImages.map(({ article: item, ...image }) => <SectionArticleCard key={item.id} article={item} image={image} />)}</div>
+              <div className="mt-4 grid gap-4 md:grid-cols-3">{relatedImages.map(({ article: item, ...image }) => <SectionArticleCard key={item.id} article={item} image={image} from={sectionFromKey} />)}</div>
             </div>
           ) : null}
         </div>

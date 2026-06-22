@@ -64,7 +64,7 @@ export default async function HomePage() {
       <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_center,rgba(52,211,153,.12),transparent_65%)]" />
       {heroArticle && heroImage ? (
         <div className="container-shell relative grid gap-8 py-10 sm:py-14 lg:grid-cols-[7fr_3fr] lg:items-start">
-          <Link href={`/articles/${heroArticle.slug}`} className="fade-up group block no-underline">
+          <Link href={`/articles/${heroArticle.slug}?from=home`} className="fade-up group block no-underline">
             <div className="relative h-[220px] overflow-hidden rounded-sm sm:h-[340px] lg:h-[420px]">
               <Image src={heroImage.src} alt={heroImage.alt} fill priority unoptimized sizes="(min-width:1024px) 65vw, 100vw" className="object-cover transition duration-700 ease-out group-hover:scale-[1.03]" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
@@ -103,7 +103,7 @@ export default async function HomePage() {
           <div className="overflow-hidden py-2.5">
             <div className="ticker-track">
               {[...ticker, ...ticker].map((article, index) => (
-                <Link key={`${article.id}-${index}`} href={`/articles/${article.slug}`} className="flex items-center gap-2 whitespace-nowrap px-6 text-xs font-bold text-white/75 no-underline hover:text-emerald-300">
+                <Link key={`${article.id}-${index}`} href={`/articles/${article.slug}?from=home`} className="flex items-center gap-2 whitespace-nowrap px-6 text-xs font-bold text-white/75 no-underline hover:text-emerald-300">
                   <span className="flex items-center gap-1 text-emerald-300"><Flame className="h-3 w-3" /> BREAKING</span>
                   {article.title}
                 </Link>
@@ -127,10 +127,10 @@ export default async function HomePage() {
       <div className="section-rule"><div><div className="kicker">The newsroom</div><h2 className="font-serif mt-1 text-3xl font-black">Every desk, at a glance.</h2></div></div>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <SectionPreviewPanel icon={Newspaper} eyebrow="Market watch" title="Industry" href="/industry">
-          {industryPreview.length ? industryPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} />) : <EmptyPreview />}
+          {industryPreview.length ? industryPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} from="home" />) : <EmptyPreview />}
         </SectionPreviewPanel>
         <SectionPreviewPanel icon={Building2} eyebrow="Capital projects" title="Developments" href="/developments">
-          {developmentsPreview.length ? developmentsPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} />) : <EmptyPreview />}
+          {developmentsPreview.length ? developmentsPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} from="home" />) : <EmptyPreview />}
         </SectionPreviewPanel>
         <SectionPreviewPanel icon={UserRoundPlus} eyebrow="Leadership" title="Executive Moves" href="/executive-moves">
           {moves.length ? moves.map((move)=><div key={move.id} className="grid grid-cols-[1fr_auto] gap-3 border-b py-2.5 last:border-0"><div><div className="font-serif text-base font-black leading-snug">{move.executive}</div><div className="mt-1 text-xs font-bold text-primary">{move.newRole} · {move.clubName}</div></div></div>) : <EmptyPreview />}
@@ -139,13 +139,13 @@ export default async function HomePage() {
           {jobs.length ? jobs.map((job)=><div key={job.id} className="border-b py-2.5 last:border-0"><div className="font-serif text-base font-black leading-snug">{job.title}</div><div className="mt-1 text-xs font-bold text-primary">{job.clubName} · {[job.city,job.state].filter(Boolean).join(", ")}</div></div>) : <EmptyPreview />}
         </SectionPreviewPanel>
         <SectionPreviewPanel icon={Wrench} eyebrow="Systems & data" title="Technology" href="/technology">
-          {technologyPreview.length ? technologyPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} />) : <EmptyPreview />}
+          {technologyPreview.length ? technologyPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} from="home" />) : <EmptyPreview />}
         </SectionPreviewPanel>
         <SectionPreviewPanel icon={Handshake} eyebrow="Deal desk" title="Mergers & Acquisitions" href="/mergers-acquisitions">
-          {dealsPreview.length ? dealsPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} />) : <EmptyPreview />}
+          {dealsPreview.length ? dealsPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} from="home" />) : <EmptyPreview />}
         </SectionPreviewPanel>
         <SectionPreviewPanel icon={PiggyBank} eyebrow="Capital monitor" title="Capital Investments" href="/capital-investments">
-          {capitalPreview.length ? capitalPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} />) : <EmptyPreview />}
+          {capitalPreview.length ? capitalPreview.map((article)=><CompactArticleRow key={article.id} article={article} showCategory={false} from="home" />) : <EmptyPreview />}
         </SectionPreviewPanel>
         <SectionPreviewPanel icon={Trophy} eyebrow="Rankings & watchlists" title="Club Rankings" href="/club-rankings">
           {rankings.length ? rankings.map((entry)=><div key={entry.id} className="flex gap-3 border-b py-2.5 last:border-0"><span className="number-tabular w-6 text-lg font-black text-primary">{entry.rank}</span><div><div className="font-black leading-snug">{entry.clubName}</div><div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{entry.category}</div></div></div>) : <EmptyPreview />}

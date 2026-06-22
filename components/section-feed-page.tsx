@@ -20,6 +20,7 @@ export async function SectionFeedPage({ title, eyebrow, description, href, categ
   const archive = articles.slice(5);
   const archiveImages = resolveArticleImages(archive, 900, 600);
   const lastUpdated = articles[0]?.publishedAt;
+  const from = href.slice(1);
 
   return <main>
     <section className="border-b bg-ink text-white">
@@ -36,7 +37,7 @@ export async function SectionFeedPage({ title, eyebrow, description, href, categ
       <div className="mb-5 flex gap-1 overflow-x-auto border-b pb-3">{categoryNav.map((item)=><Link href={item.href} key={item.href} className={`whitespace-nowrap px-3 py-2 text-xs font-black uppercase tracking-[.06em] no-underline ${item.href===href?"bg-ink text-white":"text-muted-foreground hover:bg-muted hover:text-primary"}`}>{item.label}</Link>)}</div>
       <FilterBar categories={categories} sources={sources} defaults={searchParams} action={href} />
 
-      {featured ? <div className="mt-8 grid gap-6 xl:grid-cols-[1.45fr_.75fr]"><FeaturedArticleCard article={featured} priority /><aside className="border bg-ink px-5 text-white sm:px-6"><div className="border-b border-white/15 py-5"><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-emerald-300"><BarChart3 className="h-4 w-4" /> Latest from this desk</div></div>{latest.map((article)=><CompactArticleRow key={article.id} article={article} inverse />)}{!latest.length?<p className="py-6 text-sm text-white/55">More intelligence is being indexed.</p>:null}</aside></div> : (
+      {featured ? <div className="mt-8 grid gap-6 xl:grid-cols-[1.45fr_.75fr]"><FeaturedArticleCard article={featured} priority from={from} /><aside className="border bg-ink px-5 text-white sm:px-6"><div className="border-b border-white/15 py-5"><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.14em] text-emerald-300"><BarChart3 className="h-4 w-4" /> Latest from this desk</div></div>{latest.map((article)=><CompactArticleRow key={article.id} article={article} inverse from={from} />)}{!latest.length?<p className="py-6 text-sm text-white/55">More intelligence is being indexed.</p>:null}</aside></div> : (
         <div className="mt-8 flex flex-col items-center border bg-white px-6 py-16 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted text-muted-foreground"><SearchX className="h-6 w-6" /></div>
           <h3 className="font-serif mt-5 text-2xl font-black">No briefs match this filter set</h3>
@@ -45,7 +46,7 @@ export async function SectionFeedPage({ title, eyebrow, description, href, categ
         </div>
       )}
 
-      {archive.length ? <section className="mt-12"><div className="section-rule"><div><div className="kicker">Desk archive</div><h2 className="font-serif mt-1 text-3xl font-black">More intelligence</h2></div><span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Newest first</span></div><div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{archiveImages.map(({ article, ...image })=><SectionArticleCard key={article.id} article={article} image={image} />)}</div></section> : null}
+      {archive.length ? <section className="mt-12"><div className="section-rule"><div><div className="kicker">Desk archive</div><h2 className="font-serif mt-1 text-3xl font-black">More intelligence</h2></div><span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Newest first</span></div><div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{archiveImages.map(({ article, ...image })=><SectionArticleCard key={article.id} article={article} image={image} from={from} />)}</div></section> : null}
     </section>
   </main>;
 }
