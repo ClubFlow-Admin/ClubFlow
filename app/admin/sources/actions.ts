@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { FeedAvailability } from "@prisma/client";
 import { z } from "zod";
+import { discoverFirstPartyFeed } from "@/lib/feed-discovery";
 import { prisma } from "@/lib/prisma";
 import { sourceCategories, sourceTypes } from "@/lib/source-options";
 
@@ -70,6 +71,40 @@ export async function setSourceNeedsReview(id: string, formData: FormData) {
   const needsReview = formData.get("needsReview") === "true";
   const reviewNote = optionalText.parse(formData.get("reviewNote") ?? undefined);
   await prisma.source.update({ where: { id }, data: { needsReview, reviewNote } });
+  refresh();
+}
+
+/**
+ * Adopts a recommended first-party feed found by the opportunistic prober (see
+ * lib/intake.ts maybeRecommendFirstPartyFeed / lib/feed-discovery.ts). Re-verifies the
+ * candidate URL still parses as a real feed before switching — never trusts a stale
+ * recommendation blindly. Always an explicit editor action, never automatic.
+ */
+export async function adoptFirstPartyFeed(id: string) {
+  const source = await prisma.source.findUniqueOrThrow({ where: { id } });
+  if (!source.firstPartyFeedCandidateUrl) {
+    throw new Error("No first-party feed recommendation is pending for this source.");
+  }
+
+  const reverified = await discoverFirstPartyFeed(source.homepageUrl);
+  if (!reverified || reverified !== source.firstPartyFeedCandidateUrl) {
+    await prisma.source.update({
+      where: { id },
+      data: { firstPartyFeedCandidateUrl: null, firstPartyFeedCheckedAt: new Date() }
+    });
+    throw new Error("The recommended feed no longer verifies — recommendation cleared, it will be re-checked on the next import run.");
+  }
+
+  await prisma.source.update({
+    where: { id },
+    data: {
+      sourceType: "other",
+      rssUrl: reverified,
+      feedAvailability: "available",
+      firstPartyFeedCandidateUrl: null,
+      notes: `${source.notes ? `${source.notes}\n\n` : ""}Switched to a confirmed first-party feed on ${new Date().toISOString().slice(0, 10)} (was Tier-3 Google News fallback).`
+    }
+  });
   refresh();
 }
 

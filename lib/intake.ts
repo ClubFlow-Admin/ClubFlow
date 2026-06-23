@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { generateEditorialBrief, type EditorialBrief } from "@/lib/openai";
 import { ingestRssFeed, type IngestedFeedItem } from "@/lib/rss";
 import { fetchViaGoogleNews } from "@/lib/google-news-fetcher";
+import { discoverFirstPartyFeed } from "@/lib/feed-discovery";
 import { estimateImportance } from "@/lib/importance-scoring";
 import { detectDuplicate, type DuplicateCandidate } from "@/lib/duplicate-detection";
 import type { Source } from "@prisma/client";
@@ -91,6 +92,36 @@ async function findSuggestedHeroImageUrl(categorySlug: string | undefined): Prom
   if (!categorySlug) return null;
   const asset = await prisma.mediaAsset.findFirst({ where: { category: categorySlug }, orderBy: { createdAt: "desc" } });
   return asset?.url ?? null;
+}
+
+const FIRST_PARTY_FEED_RECHECK_DAYS = 30;
+
+/**
+ * Opportunistic, rate-limited check (piggybacks on a source's own scheduled run, no extra
+ * cron needed): if a Tier-3 (google-news-fallback) source hasn't been checked for a
+ * first-party feed in FIRST_PARTY_FEED_RECHECK_DAYS, probe the well-known candidate paths
+ * via discoverFirstPartyFeed(). This only ever writes a *recommendation* — it never changes
+ * the source's live sourceType/rssUrl. An editor reviews and adopts it explicitly from the
+ * Source Health audit page (adoptFirstPartyFeed action). Failures here never affect the
+ * surrounding intake run.
+ */
+async function maybeRecommendFirstPartyFeed(source: Source) {
+  if (source.sourceType !== "google-news-fallback") return;
+  if (source.firstPartyFeedCandidateUrl) return; // already have a pending recommendation
+  const checkedRecently =
+    source.firstPartyFeedCheckedAt &&
+    Date.now() - source.firstPartyFeedCheckedAt.getTime() < FIRST_PARTY_FEED_RECHECK_DAYS * 24 * 60 * 60 * 1000;
+  if (checkedRecently) return;
+
+  try {
+    const candidate = await discoverFirstPartyFeed(source.homepageUrl);
+    await prisma.source.update({
+      where: { id: source.id },
+      data: { firstPartyFeedCandidateUrl: candidate, firstPartyFeedCheckedAt: new Date() }
+    });
+  } catch (error) {
+    console.error(`[intake] First-party feed probe failed for "${source.name}":`, error);
+  }
 }
 
 export type SourceIntakeResult = {
@@ -222,6 +253,8 @@ async function runIntakeForSource(source: Source, entityIndex: EntityIndex): Pro
         ...(result.itemsCreated > 0 ? { lastSuccessfulImportAt: new Date() } : {})
       }
     });
+
+    await maybeRecommendFirstPartyFeed(source);
 
     await prisma.importRun.create({
       data: {

@@ -106,28 +106,30 @@ model MediaAsset {
 }
 
 model Source {
-  id                     String           @id @default(cuid())
-  name                   String           @unique
-  organization           String?
-  homepageUrl            String?
-  rssUrl                 String?
-  sourceType             String           @default("other")
-  primaryCategory        String?
-  categories             String[]         @default([])
-  priority               Int              @default(50)
-  active                 Boolean          @default(true)
-  feedAvailability       FeedAvailability @default(available)
-  importFrequencyMinutes Int              @default(60)
-  needsReview            Boolean          @default(false)
-  reviewNote             String?
-  lastCheckedAt          DateTime?
-  lastSuccessfulImportAt DateTime?
-  notes                  String?
-  createdAt              DateTime         @default(now())
-  updatedAt              DateTime         @updatedAt
-  articles               Article[]
-  intakeItems            IntakeItem[]
-  importRuns             ImportRun[]
+  id                         String           @id @default(cuid())
+  name                       String           @unique
+  organization               String?
+  homepageUrl                String?
+  rssUrl                     String?
+  sourceType                 String           @default("other")
+  primaryCategory            String?
+  categories                 String[]         @default([])
+  priority                   Int              @default(50)
+  active                     Boolean          @default(true)
+  feedAvailability           FeedAvailability @default(available)
+  importFrequencyMinutes     Int              @default(60)
+  needsReview                Boolean          @default(false)
+  reviewNote                 String?
+  firstPartyFeedCandidateUrl String?
+  firstPartyFeedCheckedAt    DateTime?
+  lastCheckedAt              DateTime?
+  lastSuccessfulImportAt     DateTime?
+  notes                      String?
+  createdAt                  DateTime         @default(now())
+  updatedAt                  DateTime         @updatedAt
+  articles                   Article[]
+  intakeItems                IntakeItem[]
+  importRuns                 ImportRun[]
 
   @@index([active, sourceType])
   @@index([primaryCategory])

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowLeft } from "lucide-react";
-import { setSourceNeedsReview } from "@/app/admin/sources/actions";
+import { ArrowLeft, ArrowUpRight, Sparkles } from "lucide-react";
+import { adoptFirstPartyFeed, setSourceNeedsReview } from "@/app/admin/sources/actions";
 import { AdminTabs } from "@/components/admin-tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,8 @@ export default async function SourceHealthPage() {
     return acc;
   }, {});
 
+  const recommendations = rows.filter((row) => row.source.firstPartyFeedCandidateUrl);
+
   return (
     <main className="container-shell py-8">
       <AdminTabs />
@@ -55,6 +57,34 @@ export default async function SourceHealthPage() {
           or guessed. Quality factors with no signal yet (no runs, no articles) are excluded from the score rather than defaulted.
         </p>
       </div>
+
+      {recommendations.length ? (
+        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+          <div className="flex items-center gap-1.5 text-sm font-black text-blue-900">
+            <Sparkles className="h-4 w-4" /> {recommendations.length} first-party feed{recommendations.length > 1 ? "s" : ""} found for sources currently on the Google News fallback
+          </div>
+          <p className="mt-1 text-xs text-blue-800">
+            Discovered automatically while running intake — re-verified, never auto-switched. Review and adopt below.
+          </p>
+          <ul className="mt-3 space-y-2">
+            {recommendations.map(({ source }) => (
+              <li key={source.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-white p-2 text-xs">
+                <span>
+                  <span className="font-bold">{source.name}</span> —{" "}
+                  <a href={source.firstPartyFeedCandidateUrl!} target="_blank" rel="noreferrer" className="text-primary">
+                    {source.firstPartyFeedCandidateUrl}
+                  </a>
+                </span>
+                <form action={adoptFirstPartyFeed.bind(null, source.id)}>
+                  <Button type="submit" size="sm" variant="outline">
+                    <ArrowUpRight className="h-3.5 w-3.5" /> Adopt First-Party Feed
+                  </Button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <div className="mb-6 grid grid-cols-2 gap-px overflow-hidden rounded-lg border bg-muted/40 sm:grid-cols-3 lg:grid-cols-6">
         {(Object.keys(sourceHealthLabels) as Array<keyof typeof sourceHealthLabels>).map((key) => (
@@ -88,6 +118,11 @@ export default async function SourceHealthPage() {
                 </td>
                 <td className="px-4 py-4">
                   <Badge className={tierBadgeClass(source.sourceType)}>{tierLabel(source.sourceType)}</Badge>
+                  {source.firstPartyFeedCandidateUrl ? (
+                    <div className="mt-1 flex items-center gap-1 text-[10px] font-bold text-blue-700">
+                      <Sparkles className="h-3 w-3" /> Upgrade available
+                    </div>
+                  ) : null}
                 </td>
                 <td className="px-4 py-4">
                   <Badge className={healthBadgeClass(health)}>{sourceHealthLabels[health]}</Badge>
