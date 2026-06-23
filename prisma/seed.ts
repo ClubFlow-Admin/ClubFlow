@@ -1,5 +1,6 @@
 import { ArticleStatus, FeedAvailability, NewsletterFrequency, PrismaClient } from "@prisma/client";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { googleNewsQueryUrl } from "@/lib/google-news-fetcher";
 
 function loadLocalEnv() {
   if (!existsSync(".env")) return;
@@ -121,7 +122,17 @@ const sources = [
 
   { name: "PR Newswire", organization: "Press Release Sources", homepageUrl: "https://www.prnewswire.com", rssUrl: "https://www.prnewswire.com/rss/news-releases-list.rss", sourceType: "press-release", primaryCategory: "industry", active: true, priority: 25, feedAvailability: "available", notes: "Verified live general newswire feed this session — not golf-specific, so kept at low priority. Editors should expect it to need filtering." },
   { name: "Business Wire", organization: "Press Release Sources", homepageUrl: "https://www.businesswire.com", rssUrl: null, sourceType: "press-release", primaryCategory: "industry", active: false, priority: 25, feedAvailability: "manual", notes: "Business Wire only offers RSS via a per-keyword feed configurator (businesswire.com/help/feed-options) — no static feed URL to seed without fabricating one. An editor can generate a golf/club-keyword feed there and paste it in." },
-  { name: "GlobeNewswire", organization: "Press Release Sources", homepageUrl: "https://www.globenewswire.com", rssUrl: "https://www.globenewswire.com/RssFeed/orgclass/1/feedTitle/GlobeNewswire%20-%20News%20about%20all%20public%20companies", sourceType: "press-release", primaryCategory: "industry", active: true, priority: 25, feedAvailability: "available", notes: "Verified live general newswire feed this session — not golf-specific, so kept at low priority. Editors should expect it to need filtering." }
+  { name: "GlobeNewswire", organization: "Press Release Sources", homepageUrl: "https://www.globenewswire.com", rssUrl: "https://www.globenewswire.com/RssFeed/orgclass/1/feedTitle/GlobeNewswire%20-%20News%20about%20all%20public%20companies", sourceType: "press-release", primaryCategory: "industry", active: true, priority: 25, feedAvailability: "available", notes: "Verified live general newswire feed this session — not golf-specific, so kept at low priority. Editors should expect it to need filtering." },
+
+  // --- Source Expansion Engine sprint: real estate/development trade press + hospitality
+  // groups with significant golf portfolios. Tier 1 where a first-party feed is confirmed;
+  // Tier 3 (Google News fallback, see lib/google-news-fetcher.ts) where first-party feeds
+  // would be all-hotel noise rather than golf-relevant. Real Source Expansion Engine sprint research.
+  { name: "GlobeSt", organization: "Real Estate / Development Press", homepageUrl: "https://www.globest.com", rssUrl: "https://www.globest.com/feed/", sourceType: "real-estate-development", primaryCategory: "developments", active: true, priority: 40, feedAvailability: "available", notes: "Verified live RSS feed this session. Commercial real estate trade press — covers resort/hospitality development including golf course projects; expect filtering for relevance." },
+  { name: "Omni Hotels & Resorts", organization: "Hospitality Groups", homepageUrl: "https://www.omnihotels.com", rssUrl: "https://news.google.com/rss/search?q=%22Omni+Hotels%22+golf&hl=en-US&gl=US&ceid=US%3Aen", sourceType: "google-news-fallback", primaryCategory: "industry", active: true, priority: 30, feedAvailability: "available", notes: "Tier-3 Google News fallback (verified live this session) — Omni's own feed would be all-hotel noise; this query scopes to their golf resort portfolio. Original publisher preserved per item, this Source represents the discovery query, not the source of record." },
+  { name: "Marriott Golf", organization: "Hospitality Groups", homepageUrl: "https://www.marriott.com", rssUrl: "https://news.google.com/rss/search?q=%22Marriott%22+golf+resort&hl=en-US&gl=US&ceid=US%3Aen", sourceType: "google-news-fallback", primaryCategory: "industry", active: true, priority: 25, feedAvailability: "available", notes: "Tier-3 Google News fallback (verified live this session), scoped to Marriott's golf resort coverage rather than all-hotel news." },
+  { name: "Four Seasons Golf", organization: "Hospitality Groups", homepageUrl: "https://www.fourseasons.com", rssUrl: "https://news.google.com/rss/search?q=%22Four+Seasons%22+golf+resort&hl=en-US&gl=US&ceid=US%3Aen", sourceType: "google-news-fallback", primaryCategory: "industry", active: true, priority: 25, feedAvailability: "available", notes: "Tier-3 Google News fallback (verified live this session), scoped to Four Seasons' golf resort coverage." },
+  { name: "Salamander Hotels & Resorts", organization: "Hospitality Groups", homepageUrl: "https://www.salamanderhotels.com", rssUrl: "https://news.google.com/rss/search?q=%22Salamander+Hotels%22+golf&hl=en-US&gl=US&ceid=US%3Aen", sourceType: "google-news-fallback", primaryCategory: "industry", active: true, priority: 30, feedAvailability: "available", notes: "Tier-3 Google News fallback (verified live this session) — Salamander has a notable golf resort portfolio (e.g. Innisbrook)." }
 ] as const;
 
 function slugify(value: string) { return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""); }
@@ -315,6 +326,91 @@ function buildDemoMediaSeed() {
   return seed;
 }
 
+/**
+ * Source Expansion Engine sprint: converts last sprint's honestly-"manual" sources (no
+ * first-party feed found) into Tier-3 Google News fallback monitors, per the approved
+ * tiered strategy — never fabricates a URL, just points each at a real, verified Google
+ * News query feed (org-name queries for orgs being covered; site:-scoped queries for trade
+ * publications whose own feed is confirmed dead). If a first-party feed is ever found for
+ * any of these, just update its sourceType/rssUrl directly — this promotion list doesn't
+ * need to change. Idempotent: safe to re-run.
+ */
+const tier3Promotions: { name: string; query: string; priority?: number }[] = [
+  // Associations
+  { name: "USGA", query: '"USGA" golf' },
+  { name: "PGA of America", query: '"PGA of America" golf' },
+  { name: "GCSAA", query: '"GCSAA" golf course superintendents' },
+  { name: "CMAA", query: '"Club Management Association" golf' },
+  { name: "NGCOA", query: '"National Golf Course Owners Association"' },
+  // Management Companies
+  { name: "Troon", query: '"Troon" golf management' },
+  { name: "Invited", query: '"Invited" golf clubs' },
+  { name: "Arcis Golf", query: '"Arcis Golf"' },
+  { name: "Concert Golf Partners", query: '"Concert Golf Partners"' },
+  { name: "Dormie Network", query: '"Dormie Network" golf' },
+  { name: "Bobby Jones Links", query: '"Bobby Jones Links" golf' },
+  { name: "Heritage Golf Group", query: '"Heritage Golf Group"' },
+  { name: "Landscapes Golf Management", query: '"Landscapes Golf Management"' },
+  { name: "Indigo Sports", query: '"Indigo Golf Partners"' },
+  // Technology Companies
+  { name: "Clubessential", query: '"Clubessential" golf club' },
+  { name: "Jonas Club Software", query: '"Jonas Club Software"' },
+  { name: "foreUP", query: '"foreUP" golf' },
+  { name: "Club Caddie", query: '"Club Caddie" golf' },
+  { name: "Lightspeed", query: '"Lightspeed Golf"' },
+  { name: "EZLinks", query: '"EZLinks" golf' },
+  { name: "Gallus Golf", query: '"Gallus Golf"' },
+  { name: "Supreme Golf", query: '"Supreme Golf"' },
+  // Architecture Firms
+  { name: "Nicklaus Design", query: '"Nicklaus Design" golf course' },
+  { name: "Beau Welling Design", query: '"Beau Welling" golf course' },
+  { name: "Fry/Straka", query: '"Fry/Straka" golf course' },
+  { name: "Hart Howerton", query: '"Hart Howerton" golf' },
+  { name: "Love Golf Design", query: '"Love Golf Design"' },
+  { name: "Coore & Crenshaw", query: '"Coore & Crenshaw" golf course' },
+  { name: "Tom Doak", query: '"Tom Doak" golf course' },
+  { name: "Rees Jones", query: '"Rees Jones" golf course' },
+  { name: "Gil Hanse", query: '"Gil Hanse" golf course' },
+  { name: "Tripp Davis", query: '"Tripp Davis" golf course' },
+  // Leading Clubs
+  { name: "Pinehurst", query: '"Pinehurst Resort" golf' },
+  { name: "Pebble Beach", query: '"Pebble Beach" golf', priority: 40 },
+  { name: "Bandon Dunes", query: '"Bandon Dunes" golf' },
+  { name: "Streamsong", query: '"Streamsong" golf resort' },
+  { name: "Sand Valley", query: '"Sand Valley" golf resort' },
+  { name: "High Hampton", query: '"High Hampton" club resort' },
+  { name: "Kiawah Island", query: '"Kiawah Island" golf' },
+  { name: "Sea Island", query: '"Sea Island" golf resort' },
+  // Industry Publications whose own feed is confirmed dead/missing — site:-scoped query
+  // stands in for "their feed" via Google's index of what they've actually published.
+  { name: "Golf Course Industry", query: "site:golfcourseindustry.com" },
+  { name: "Golf Course Architecture", query: "site:golfcoursearchitecture.net" },
+  { name: "Golfdom", query: "site:golfdom.com" },
+  { name: "Golf Business News", query: "site:golfbusinessnews.com" },
+  { name: "BoardRoom Magazine", query: "site:boardroommagazine.com" },
+  { name: "Golf Course Management (GCSAA)", query: "site:gcmonline.com" },
+  // Press Release Sources
+  { name: "Business Wire", query: "site:businesswire.com golf" }
+];
+
+async function promoteToGoogleNewsFallback() {
+  for (const promotion of tier3Promotions) {
+    const existing = await prisma.source.findUnique({ where: { name: promotion.name } });
+    if (!existing) continue; // skip silently if a name doesn't match (e.g. renamed) rather than create a stray row
+    await prisma.source.update({
+      where: { name: promotion.name },
+      data: {
+        sourceType: "google-news-fallback",
+        rssUrl: googleNewsQueryUrl(promotion.query),
+        feedAvailability: "available",
+        active: true,
+        priority: promotion.priority ?? existing.priority,
+        notes: `Tier-3 Google News fallback (Source Expansion Engine sprint) — no first-party feed found after two rounds of verification. Query: ${promotion.query}. Original publisher is preserved per intake item; this Source represents the discovery query, not the source of record. Swap sourceType/rssUrl to a real first-party feed here if one is found later.`
+      }
+    });
+  }
+}
+
 async function main() {
   const categoryRecords = await Promise.all(categories.map(([name, slug, description]) => prisma.category.upsert({ where: { slug }, update: { name, description }, create: { name, slug, description } })));
   const sourceRecords = await Promise.all(sources.map((source) => {
@@ -327,6 +423,8 @@ async function main() {
   }));
   const categoryBySlug = Object.fromEntries(categoryRecords.map((record) => [record.slug, record]));
   const sourceByName = Object.fromEntries(sourceRecords.map((record) => [record.name, record]));
+
+  await promoteToGoogleNewsFallback();
 
   const demoMediaSeed = buildDemoMediaSeed();
   const demoMediaRecords = await Promise.all(

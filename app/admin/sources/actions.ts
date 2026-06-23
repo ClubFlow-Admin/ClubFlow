@@ -44,6 +44,7 @@ function dataFromForm(formData: FormData) {
 
 function refresh() {
   revalidatePath("/admin/sources");
+  revalidatePath("/admin/sources/health");
   revalidatePath("/admin");
 }
 
@@ -62,6 +63,13 @@ export async function updateSource(id: string, formData: FormData) {
 
 export async function setSourceActive(id: string, active: boolean) {
   await prisma.source.update({ where: { id }, data: { active } });
+  refresh();
+}
+
+export async function setSourceNeedsReview(id: string, formData: FormData) {
+  const needsReview = formData.get("needsReview") === "true";
+  const reviewNote = optionalText.parse(formData.get("reviewNote") ?? undefined);
+  await prisma.source.update({ where: { id }, data: { needsReview, reviewNote } });
   refresh();
 }
 

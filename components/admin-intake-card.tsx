@@ -75,7 +75,7 @@ export function AdminIntakeCard({ item, categoryOptions, aiConfigured }: Props) 
           )}
 
           <dl className="mt-4 grid grid-cols-2 gap-3 border-t pt-4 text-xs sm:grid-cols-4">
-            <Meta label="Source" value={item.source.name} />
+            <Meta label="Monitored Via" value={item.source.name} />
             <Meta
               label="Imported"
               value={formatDistanceToNow(item.createdAt, { addSuffix: true })}
@@ -84,6 +84,12 @@ export function AdminIntakeCard({ item, categoryOptions, aiConfigured }: Props) 
             <Meta label="Published" value={format(item.publishedAt, "MMM d, yyyy")} />
             <Meta label="Category" value={categoryLabel ?? "Uncategorized"} />
           </dl>
+
+          {item.originalPublisherName ? (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Discovered via Google News — original publisher: <span className="font-bold text-foreground">{item.originalPublisherName}</span>
+            </p>
+          ) : null}
 
           <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
             <a

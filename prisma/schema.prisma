@@ -118,6 +118,8 @@ model Source {
   active                 Boolean          @default(true)
   feedAvailability       FeedAvailability @default(available)
   importFrequencyMinutes Int              @default(60)
+  needsReview            Boolean          @default(false)
+  reviewNote             String?
   lastCheckedAt          DateTime?
   lastSuccessfulImportAt DateTime?
   notes                  String?
@@ -145,6 +147,7 @@ model IntakeItem {
   suggestedImportance     Int          @default(50)
   executiveSummary        String
   suggestedHeroImageUrl   String?
+  originalPublisherName   String?
   duplicateConfidence     Int          @default(0)
   duplicateOfArticleId    String?
   duplicateOfArticle      Article?     @relation("IntakeDuplicateArticle", fields: [duplicateOfArticleId], references: [id], onDelete: SetNull)

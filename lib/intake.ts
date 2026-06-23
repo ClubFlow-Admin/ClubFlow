@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { generateEditorialBrief, type EditorialBrief } from "@/lib/openai";
 import { ingestRssFeed, type IngestedFeedItem } from "@/lib/rss";
+import { fetchViaGoogleNews } from "@/lib/google-news-fetcher";
 import { estimateImportance } from "@/lib/importance-scoring";
 import { detectDuplicate, type DuplicateCandidate } from "@/lib/duplicate-detection";
 import type { Source } from "@prisma/client";
@@ -20,7 +21,7 @@ export const categorySlugBySourceCategory: Record<string, string> = {
   clubopspro: "clubopspro"
 };
 
-type RawIntakeCandidate = IngestedFeedItem;
+type RawIntakeCandidate = IngestedFeedItem & { originalPublisherName?: string };
 
 type SourceFetcher = (source: Source) => Promise<RawIntakeCandidate[]>;
 
@@ -44,7 +45,11 @@ const fetchersByType: Partial<Record<string, SourceFetcher>> = {
   "press-release": fetchViaRss,
   "technology-vendor": fetchViaRss,
   "podcast-media": fetchViaRss,
-  other: fetchViaRss
+  other: fetchViaRss,
+  // Tier-3 fallback (see lib/google-news-fetcher.ts) — used only when a source has no
+  // first-party feed. Swapping a source back to a real feed just means changing its
+  // sourceType/rssUrl; no code change needed here.
+  "google-news-fallback": fetchViaGoogleNews
   // "newsroom-feed" and "website-feed" intentionally have no fetcher yet — runIntake()
   // skips them with a clear "fetcher not implemented" result instead of erroring.
 };
@@ -191,6 +196,7 @@ async function runIntakeForSource(source: Source, entityIndex: EntityIndex): Pro
           title: item.title,
           publishedAt,
           rawExcerpt: item.excerpt ?? null,
+          originalPublisherName: item.originalPublisherName ?? null,
           suggestedCategorySlug,
           suggestedTags: matchedEntityNames,
           suggestedImportance,
