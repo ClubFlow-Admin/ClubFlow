@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { AlertTriangle, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { IngestRunSummary } from "@/lib/ingest";
+import type { IntakeRunSummary } from "@/lib/intake";
 
 type IngestState =
   | { status: "idle" }
   | { status: "loading" }
-  | { status: "success"; summary: IngestRunSummary }
+  | { status: "success"; summary: IntakeRunSummary }
   | { status: "error"; message: string };
 
 export function AdminIngestButton() {
@@ -17,15 +17,15 @@ export function AdminIngestButton() {
   async function runIngestion() {
     setState({ status: "loading" });
     try {
-      const response = await fetch("/api/ingest/rss", { method: "POST" });
+      const response = await fetch("/api/intake/run", { method: "POST" });
       const data = await response.json();
       if (!response.ok) {
-        setState({ status: "error", message: data?.error ?? `Ingestion failed (${response.status}).` });
+        setState({ status: "error", message: data?.error ?? `Intake run failed (${response.status}).` });
         return;
       }
-      setState({ status: "success", summary: data as IngestRunSummary });
+      setState({ status: "success", summary: data as IntakeRunSummary });
     } catch (error) {
-      setState({ status: "error", message: error instanceof Error ? error.message : "Ingestion request failed." });
+      setState({ status: "error", message: error instanceof Error ? error.message : "Intake run request failed." });
     }
   }
 
@@ -33,21 +33,19 @@ export function AdminIngestButton() {
     <div className="flex flex-col items-end gap-3">
       <Button type="button" variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20" onClick={runIngestion} disabled={state.status === "loading"}>
         {state.status === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-        {state.status === "loading" ? "Running Ingestion…" : "Run RSS Ingestion"}
+        {state.status === "loading" ? "Running Intake…" : "Run Intake for All Sources"}
       </Button>
 
       {state.status === "success" ? (
         <div className="w-full max-w-md rounded-md border border-emerald-300/40 bg-emerald-950/40 p-4 text-left text-xs text-white">
           <div className="flex items-center gap-2 font-black text-emerald-300">
-            <CheckCircle2 className="h-4 w-4" /> Ingestion complete — new items enter as drafts and are never auto-published.
+            <CheckCircle2 className="h-4 w-4" /> Run complete — new items land in the Intake Queue and are never auto-published.
           </div>
           <dl className="mt-3 grid grid-cols-2 gap-2">
             <Stat label="Sources checked" value={state.summary.sourcesChecked} />
             <Stat label="Items found" value={state.summary.itemsFound} />
-            <Stat label="Articles created" value={state.summary.articlesCreated} />
+            <Stat label="Items created" value={state.summary.itemsCreated} />
             <Stat label="Duplicates skipped" value={state.summary.duplicatesSkipped} />
-            <Stat label="AI summaries generated" value={state.summary.aiSummariesGenerated} />
-            <Stat label="Entities linked" value={state.summary.entitiesLinked} />
           </dl>
           {state.summary.sources.some((source) => source.status === "error" || source.error) ? (
             <div className="mt-3 border-t border-white/10 pt-3">

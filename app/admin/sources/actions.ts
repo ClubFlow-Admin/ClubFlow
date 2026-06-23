@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { FeedAvailability } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { sourceCategories, sourceTypes } from "@/lib/source-options";
@@ -11,11 +12,14 @@ const optionalUrl = z.preprocess((value) => value === "" ? null : value, z.strin
 const optionalDate = z.preprocess((value) => value === "" ? null : value, z.string().nullable());
 const sourceSchema = z.object({
   name: z.string().trim().min(2),
+  organization: optionalText,
   homepageUrl: optionalUrl,
   rssUrl: optionalUrl,
   sourceType: z.enum(sourceTypes.map((item) => item.value) as [string, ...string[]]),
   primaryCategory: z.preprocess((value) => value === "" ? null : value, z.enum(sourceCategories.map((item) => item.value) as [string, ...string[]]).nullable()),
   priority: z.coerce.number().int().min(0).max(100),
+  feedAvailability: z.nativeEnum(FeedAvailability),
+  importFrequencyMinutes: z.coerce.number().int().min(5).max(1440),
   lastCheckedAt: optionalDate,
   lastSuccessfulImportAt: optionalDate,
   notes: optionalText
@@ -58,5 +62,17 @@ export async function updateSource(id: string, formData: FormData) {
 
 export async function setSourceActive(id: string, active: boolean) {
   await prisma.source.update({ where: { id }, data: { active } });
+  refresh();
+}
+
+export async function deleteSource(id: string) {
+  const [articleCount, intakeItemCount] = await Promise.all([
+    prisma.article.count({ where: { sourceId: id } }),
+    prisma.intakeItem.count({ where: { sourceId: id } })
+  ]);
+  if (articleCount > 0 || intakeItemCount > 0) {
+    throw new Error("This source has articles or intake history — disable it instead of deleting.");
+  }
+  await prisma.source.delete({ where: { id } });
   refresh();
 }

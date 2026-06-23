@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { sourceCategories, sourcePriorities, sourceTypes } from "@/lib/source-options";
+import { feedAvailabilities, sourceCategories, sourcePriorities, sourceTypes } from "@/lib/source-options";
 
 function localDateTime(value?: Date | null) {
   if (!value) return undefined;
@@ -17,11 +17,14 @@ export function AdminSourceForm({ action, source }: { action: (formData: FormDat
     <form action={action} className="grid gap-6 rounded-lg border bg-white p-5">
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Source name" name="name" defaultValue={source?.name} required />
+        <Field label="Organization" name="organization" defaultValue={source?.organization ?? undefined} placeholder="e.g. PR Newswire" />
         <Field label="Website URL" name="homepageUrl" defaultValue={source?.homepageUrl ?? undefined} type="url" placeholder="https://example.com" />
         <Field label="RSS feed URL" name="rssUrl" defaultValue={source?.rssUrl ?? undefined} type="url" placeholder="https://example.com/feed" />
         <Select label="Source type" name="sourceType" defaultValue={source?.sourceType ?? "other"} options={sourceTypes} />
         <Select label="Primary category" name="primaryCategory" defaultValue={source?.primaryCategory ?? ""} options={[{ value: "", label: "Unassigned" }, ...sourceCategories]} />
         <Select label="Priority" name="priority" defaultValue={String(source?.priority ?? 50)} options={sourcePriorities.map((item) => ({ value: String(item.value), label: item.label }))} />
+        <Select label="Feed availability" name="feedAvailability" defaultValue={source?.feedAvailability ?? "available"} options={feedAvailabilities} />
+        <Field label="Import frequency (minutes)" name="importFrequencyMinutes" defaultValue={String(source?.importFrequencyMinutes ?? 60)} type="number" min={5} max={1440} />
         <Field label="Last checked" name="lastCheckedAt" defaultValue={localDateTime(source?.lastCheckedAt)} type="datetime-local" />
         <Field label="Last successful import" name="lastSuccessfulImportAt" defaultValue={localDateTime(source?.lastSuccessfulImportAt)} type="datetime-local" />
       </div>

@@ -23,41 +23,62 @@ enum EntityStatus {
   inactive
 }
 
-model Article {
-  id              String        @id @default(cuid())
-  title           String
-  dek             String?
-  slug            String        @unique
-  originalUrl     String        @unique
-  author          String?
-  publishedAt     DateTime
-  tags            String[]      @default([])
-  clubName        String?
-  city            String?
-  state           String?
-  originalExcerpt String?
-  aiSummary       String
-  aiWhatHappened  String?
-  aiWhyItMatters  String?
-  aiKeyTakeaways  String[]      @default([])
-  aiIndustryContext String?
-  importanceScore Int           @default(50)
-  status          ArticleStatus @default(draft)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+enum FeedAvailability {
+  available
+  unavailable
+  manual
+}
 
-  sourceId   String
-  source     Source   @relation(fields: [sourceId], references: [id])
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
+enum IntakeStatus {
+  pending
+  approved
+  rejected
+  archived
+  scheduled
+}
+
+enum ImportRunStatus {
+  ok
+  error
+}
+
+model Article {
+  id                String        @id @default(cuid())
+  title             String
+  dek               String?
+  slug              String        @unique
+  originalUrl       String        @unique
+  author            String?
+  publishedAt       DateTime
+  tags              String[]      @default([])
+  clubName          String?
+  city              String?
+  state             String?
+  originalExcerpt   String?
+  aiSummary         String
+  aiWhatHappened    String?
+  aiWhyItMatters    String?
+  aiKeyTakeaways    String[]      @default([])
+  aiIndustryContext String?
+  importanceScore   Int           @default(50)
+  status            ArticleStatus @default(draft)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  sourceId    String
+  source      Source      @relation(fields: [sourceId], references: [id])
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id])
   heroImageId String?
   heroImage   MediaAsset? @relation(fields: [heroImageId], references: [id], onDelete: SetNull)
 
-  executiveMove     ExecutiveMove?
-  developmentProject DevelopmentProject?
-  newsletterStories  NewsletterStory[]
+  executiveMove        ExecutiveMove?
+  developmentProject   DevelopmentProject?
+  newsletterStories    NewsletterStory[]
+  intakeApprovedFrom   IntakeItem?         @relation("IntakeApprovedArticle")
+  duplicateIntakeItems IntakeItem[]        @relation("IntakeDuplicateArticle")
 
-  clubs    Club[]
+  clubs     Club[]
   companies Company[]
   people    Person[]
 
@@ -70,39 +91,91 @@ model Article {
 }
 
 model MediaAsset {
-  id          String    @id @default(cuid())
-  title       String
-  url         String    @unique
-  altText     String?
-  caption     String?
-  credit      String?
-  category    String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  articles    Article[]
+  id        String    @id @default(cuid())
+  title     String
+  url       String    @unique
+  altText   String?
+  caption   String?
+  credit    String?
+  category  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  articles  Article[]
 
   @@index([category])
 }
 
 model Source {
-  id                     String    @id @default(cuid())
-  name                   String    @unique
+  id                     String           @id @default(cuid())
+  name                   String           @unique
+  organization           String?
   homepageUrl            String?
   rssUrl                 String?
-  sourceType             String    @default("other")
+  sourceType             String           @default("other")
   primaryCategory        String?
-  categories             String[]  @default([])
-  priority               Int       @default(50)
-  active                 Boolean   @default(true)
+  categories             String[]         @default([])
+  priority               Int              @default(50)
+  active                 Boolean          @default(true)
+  feedAvailability       FeedAvailability @default(available)
+  importFrequencyMinutes Int              @default(60)
   lastCheckedAt          DateTime?
   lastSuccessfulImportAt DateTime?
   notes                  String?
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
   articles               Article[]
+  intakeItems            IntakeItem[]
+  importRuns             ImportRun[]
 
   @@index([active, sourceType])
   @@index([primaryCategory])
+}
+
+model IntakeItem {
+  id                      String       @id @default(cuid())
+  sourceId                String
+  source                  Source       @relation(fields: [sourceId], references: [id])
+  originalUrl             String       @unique
+  title                   String
+  publishedAt             DateTime
+  rawExcerpt              String?
+  rawContent              String?
+  suggestedCategorySlug   String?
+  suggestedTags           String[]     @default([])
+  suggestedImportance     Int          @default(50)
+  executiveSummary        String
+  suggestedHeroImageUrl   String?
+  duplicateConfidence     Int          @default(0)
+  duplicateOfArticleId    String?
+  duplicateOfArticle      Article?     @relation("IntakeDuplicateArticle", fields: [duplicateOfArticleId], references: [id], onDelete: SetNull)
+  duplicateOfIntakeItemId String?
+  duplicateOfIntakeItem   IntakeItem?  @relation("IntakeDuplicateItem", fields: [duplicateOfIntakeItemId], references: [id], onDelete: SetNull)
+  duplicateCandidates     IntakeItem[] @relation("IntakeDuplicateItem")
+  status                  IntakeStatus @default(pending)
+  scheduledFor            DateTime?
+  articleId               String?      @unique
+  article                 Article?     @relation("IntakeApprovedArticle", fields: [articleId], references: [id], onDelete: SetNull)
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([sourceId])
+  @@index([duplicateOfArticleId])
+}
+
+model ImportRun {
+  id                String          @id @default(cuid())
+  sourceId          String
+  source            Source          @relation(fields: [sourceId], references: [id])
+  startedAt         DateTime        @default(now())
+  finishedAt        DateTime?
+  itemsFound        Int             @default(0)
+  itemsCreated      Int             @default(0)
+  duplicatesSkipped Int             @default(0)
+  status            ImportRunStatus @default(ok)
+  errorMessage      String?
+
+  @@index([sourceId, startedAt])
 }
 
 model Category {
@@ -123,61 +196,61 @@ model NewsletterSubscriber {
 }
 
 model NewsletterIssue {
-  id          String            @id @default(cuid())
+  id          String              @id @default(cuid())
   title       String
   frequency   NewsletterFrequency
   scheduledAt DateTime?
   sentAt      DateTime?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
   stories     NewsletterStory[]
 }
 
 model NewsletterStory {
-  id            String          @id @default(cuid())
-  issueId       String
-  articleId     String
-  shortSummary  String
-  position      Int             @default(0)
-  issue         NewsletterIssue @relation(fields: [issueId], references: [id], onDelete: Cascade)
-  article       Article         @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  id           String          @id @default(cuid())
+  issueId      String
+  articleId    String
+  shortSummary String
+  position     Int             @default(0)
+  issue        NewsletterIssue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  article      Article         @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@unique([issueId, articleId])
 }
 
 model JobPosting {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   title       String
   clubName    String
   city        String?
   state       String?
   url         String?
-  postedAt    DateTime @default(now())
+  postedAt    DateTime      @default(now())
   expiresAt   DateTime?
   description String?
   status      ArticleStatus @default(draft)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@unique([title, clubName])
 }
 
 model ExecutiveMove {
-  id          String   @id @default(cuid())
-  executive   String
-  newRole     String
+  id           String        @id @default(cuid())
+  executive    String
+  newRole      String
   previousRole String?
-  clubName    String
-  city        String?
-  state       String?
-  effectiveAt DateTime?
-  publishedAt DateTime?
-  notes       String?
-  status      ArticleStatus @default(draft)
-  articleId   String?  @unique
-  article     Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  clubName     String
+  city         String?
+  state        String?
+  effectiveAt  DateTime?
+  publishedAt  DateTime?
+  notes        String?
+  status       ArticleStatus @default(draft)
+  articleId    String?       @unique
+  article      Article?      @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model DevelopmentProject {
@@ -198,7 +271,7 @@ model DevelopmentProject {
 }
 
 model RankingEntry {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   category    String
   rank        Int
   clubName    String
@@ -208,8 +281,8 @@ model RankingEntry {
   rationale   String
   publishedAt DateTime?
   status      ArticleStatus @default(draft)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@unique([category, clubName])
   @@index([category, rank])
@@ -241,18 +314,18 @@ model Club {
 }
 
 model Company {
-  id            String       @id @default(cuid())
-  name          String
-  slug          String       @unique
-  industry      String?
-  website       String?
-  logoUrl       String?
-  description   String?
-  headquarters  String?
-  tags          String[]     @default([])
-  status        EntityStatus @default(active)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id           String       @id @default(cuid())
+  name         String
+  slug         String       @unique
+  industry     String?
+  website      String?
+  logoUrl      String?
+  description  String?
+  headquarters String?
+  tags         String[]     @default([])
+  status       EntityStatus @default(active)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   articles Article[]
 
@@ -282,15 +355,15 @@ model Person {
 }
 
 model PodcastEpisode {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   showName    String
-  title       String   @unique
+  title       String        @unique
   description String
   duration    String?
   publishedAt DateTime?
   audioUrl    String?
-  comingSoon  Boolean  @default(true)
+  comingSoon  Boolean       @default(true)
   status      ArticleStatus @default(draft)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }

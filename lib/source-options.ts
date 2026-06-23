@@ -7,8 +7,20 @@ export const sourceTypes = [
   { value: "press-release", label: "Press release source" },
   { value: "technology-vendor", label: "Technology vendor" },
   { value: "podcast-media", label: "Podcast/media" },
+  { value: "newsroom-feed", label: "Newsroom feed (future-ready, no fetcher yet)" },
+  { value: "website-feed", label: "Website feed (future-ready, no fetcher yet)" },
   { value: "other", label: "Other" }
 ] as const;
+
+export const feedAvailabilities = [
+  { value: "available", label: "Available" },
+  { value: "unavailable", label: "Unavailable (known dead feed)" },
+  { value: "manual", label: "Manual (no feed exists yet)" }
+] as const;
+
+export function feedAvailabilityLabel(value: string) {
+  return feedAvailabilities.find((item) => item.value === value)?.label ?? value;
+}
 
 export const sourceCategories = [
   { value: "industry", label: "Industry" },
